@@ -1,0 +1,20 @@
+{
+  "name": "com.sturfee.vps.core",
+  "version": "3.0.0",
+  "displayName": "SturfeeVPS.Core",
+  "description": "Core library for Sturfee VPS SDK",
+  "unity": "2020.3",
+  "unityRelease": "11f1",
+  "keywords": [
+    "sturfee",
+    "vps",
+    "localization",
+    "ar"
+  ],
+  "author": {
+    "name": "Sturfee Inc",
+    "email": "contact@sturfee.com",
+    "url": "https://sturfee.com"
+  },
+  "type": "library"
+}
