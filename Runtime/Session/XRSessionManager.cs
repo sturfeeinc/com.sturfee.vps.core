@@ -31,7 +31,7 @@
             }
             else
             {
-                SturfeeDebug.LogError("No active XRSession. Please create one using CreateSession()");
+                SturfeeDebug.LogWarning("No active XRSession. Please create one using CreateSession()");
             }
 
             return null;
