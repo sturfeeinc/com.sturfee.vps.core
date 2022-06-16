@@ -88,7 +88,7 @@ namespace SturfeeVPS.Core
                 sceneImporter.MaximumLod = 300;
                 sceneImporter.Timeout = 100;
                 sceneImporter.IsMultithreaded = false;
-                sceneImporter.CustomShaderName = "Sturfee/Transparent";
+                sceneImporter.CustomShaderName = "VR/SpatialMapping/Occlusion";
 
                 await sceneImporter.LoadSceneAsync(0, true, null, cancellationToken);
                 await sceneImporter.LoadSceneAsync(1, true, null, cancellationToken);
