@@ -5,9 +5,6 @@ internal static class ServerInfo
     private const string API = "https://api.sturfee.com/api/0.2.0";
     private const string WEBSOCKET = "wss://api.sturfee.com/api/0.2.0/alignment/ws";
 
-    //private const string API = "https://blue-api.sturfee.com/api/0.2.0";
-    //private const string WEBSOCKET = "wss://blue-api.sturfee.com/api/0.2.0/alignment/ws";
-
     public static string SturfeeAPI
     {
         get

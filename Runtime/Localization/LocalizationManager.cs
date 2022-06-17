@@ -90,12 +90,12 @@ namespace SturfeeVPS.Core
             _scanRoutine = xRSession.StartCoroutine(PerformLocalizationAsync(scanType).AsCoroutine());            
         }
 
-
         public void CancelScan() 
         {
             _webSocketService?.Close();
             _webSocketService = null;
         }
+        
         public void StopScan()
         {
             if (_scanRoutine != null)
@@ -111,7 +111,6 @@ namespace SturfeeVPS.Core
             CancelScan();
             ResetOffsets();
         }
-
 
         private async Task PerformLocalizationAsync(ScanType scanType)
         {
