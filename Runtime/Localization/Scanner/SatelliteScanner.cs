@@ -138,6 +138,14 @@ namespace SturfeeVPS.Core
                 SourceImage = ByteString.CopyFrom(
                     XRSessionManager.GetSession().VideoProvider.GetCurrentFrame().EncodeToJPG()),
             };
+
+            string siteId = PlayerPrefs.GetString("SturfeeVPS.Core.HD.SiteId", "");
+            if (!string.IsNullOrEmpty(siteId))
+            {
+                SturfeeDebug.Log($" Adding SiteId {siteId} to request");
+                request.SiteId = siteId;
+            }
+
             return request;
         }
 
@@ -196,6 +204,7 @@ namespace SturfeeVPS.Core
                     isPortrait = XRSessionManager.GetSession().VideoProvider.IsPortrait() ? 1 : 0,
                     projectionMatrix = XRSessionManager.GetSession().VideoProvider.GetProjectionMatrix()
                 },
+                siteId = request.SiteId                
             };
 
             Requests.Add(localizationRequest);

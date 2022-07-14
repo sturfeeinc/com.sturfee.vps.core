@@ -1,0 +1,73 @@
+//protoc --proto_path=./ --csharp_out=./Models ./params.proto
+
+syntax = "proto3";
+
+package SturfeeVPS.Core.Proto;
+  
+enum OperationMessages {
+    UNSUPPORTED = 0;
+    ALIGNMENT = 4;
+    RELOC = 5;
+}
+
+message Position {
+    double lat = 1;
+    double lon = 2;
+    double height = 3;         
+}
+
+message Quaternion {
+    double x = 2;
+    double y = 1;
+    double z = 3;
+    double w = 4;
+}
+
+message ExternalParameters {
+    Position position = 1;
+    Quaternion quaternion = 2;
+}
+
+message InternalParameters {
+    uint32 scene_height = 1;
+    uint32 scene_width = 2;
+    float fov = 3;
+    repeated double projectionMatrix = 4;
+}
+ 
+message Request{ 
+    OperationMessages operation = 1;
+    uint32 request_id = 2;
+    ExternalParameters external_parameters = 3;
+    InternalParameters internal_parameters = 4;
+    uint32 total_num_of_frames = 5;
+    uint32 frame_order = 6;
+    string tracking_id = 7;
+    bytes source_image = 9;
+    string site_id = 10;
+    int64 dev_radius = 20;
+}
+
+message Response {
+    Position position = 1;
+    Quaternion yaw_offset_quaternion = 2;
+    Quaternion pitch_offset_quaternion = 3;
+}
+message Error {
+    enum ErrorCodes {
+        NO_ERROR = 0;
+        UNEXPECTED_SERVER_ERROR = 5211;
+        PROTOCOL_ERROR = 5212;
+        VALIDATION_ERROR = 5213;
+        OUT_OF_COVERAGE_ERROR = 5214;
+    }
+    ErrorCodes code = 1;
+    string message = 2;
+}
+
+message ResponseMessage {
+    uint32 request_id = 1;
+    string tracking_id = 2;
+    Response response = 3;
+    Error error = 4;
+}

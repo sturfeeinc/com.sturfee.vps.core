@@ -9,6 +9,7 @@ namespace SturfeeVPS.Core
     {
         public int requestId;
         public Multiframe frame;
+        public string siteId;
         public ExternalParameters externalParameters;
         public InternalParameters internalParameters;
     }
