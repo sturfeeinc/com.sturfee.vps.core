@@ -147,17 +147,11 @@ namespace SturfeeVPS.Core
             _webSocketService.Close();
             _webSocketService = null;
 
-
-            // TODO: check if response is error response
-
             if (responseMessage.Error != null)
             {
                 SturfeeDebug.LogError("Server Error : " + responseMessage.Error);
                 
-                if(responseMessage.Error.Code == Error.Types.ErrorCodes.OutOfCoverageError)
-                {
-                    ErrorMessages.ServerError = (responseMessage.Error.Code.ToString(), responseMessage.Error.Message);
-                }
+                ErrorMessages.ServerError = (responseMessage.Error.Code.ToString(), responseMessage.Error.Message);
 
                 SturfeeEventManager.Instance.LocalizationFail(ErrorMessages.ServerError);                 
                 return;

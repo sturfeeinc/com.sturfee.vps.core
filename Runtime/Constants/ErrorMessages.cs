@@ -17,7 +17,7 @@ public static class ErrorMessages
     public static (string, string) TileLoadingErrorFromCache = ("TileLoadingErrorFromCache", "Tile loading error. Center Reference NUll in cache");
     public static (string, string) TileDownloadingError = ("TileDownloadingError", "Tile downloading error");
     public static (string, string) SocketConnectionFail = ("SocketConnectionFail", "Socket connection failed");
-    public static (string, string) SessionNotReady = ("SessionNotReady", "Session is not ready/created");
+    public static (string, string) SessionNotReady = ("SessionNotReady", "Session is not ready or session creation failed");
 
     #endregion
 

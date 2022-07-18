@@ -81,14 +81,14 @@ namespace SturfeeVPS.Core
         public async Task CreateSession(CancellationToken ct)
         {
             await Task.Yield();
-            SturfeeEventManager.Instance.SessionInitializing(); 
+            SturfeeEventManager.Instance.SessionInitializing();
             try
             {
                 Uri uri = new Uri(ServerInfo.SturfeeAPI);
                 SturfeeDebug.Log("Pointing to endpoint : " + uri.Host);
 
                 await WaitForGps(ct);
-                await CheckConnection(); 
+                await CheckConnection();
 
                 var location = GpsProvider.GetCurrentLocation();
                 SturfeeDebug.Log("Start Location : " + location.ToFormattedString());
@@ -106,19 +106,17 @@ namespace SturfeeVPS.Core
                 SturfeeEventManager.Instance.SessionIsReady();
 
             }
-            catch(SessionException e)
-            {
-                SturfeeDebug.LogError(e.Message);
-                Status = XRSessionStatus.NotCreated;
-                SessionFail = e.Message;
-                throw e;
-            }
             catch (Exception e)
             {
                 SturfeeDebug.LogError(e.Message);
                 Status = XRSessionStatus.NotCreated;
                 SessionFail = e.Message;
-                throw e;
+                if (e is SessionException)
+                {
+                    throw;
+                }
+
+                throw new SessionException(ErrorMessages.SessionNotReady);
             }
         }
 
@@ -425,21 +423,21 @@ namespace SturfeeVPS.Core
         {
             _preScanCTS = new CancellationTokenSource();
             var cancellationToken = _preScanCTS.Token;
-
-            // Providers
-            var gpsPrescan = GpsProvider.PrepareForScan(cancellationToken);
-            var posePrescan= PoseProvider.PrepareForScan(cancellationToken);
-            var videoPrescan = VideoProvider.PrepareForScan(cancellationToken);
-
-            // Session
-            var sessionVerification = VerifySession(cancellationToken).CancelOnFaulted(_preScanCTS);
-
-            // Socket
-            WebSocketService wss = new WebSocketService(ServerInfo.WebSocketServiceUrl, _token, Config.Locale);
-            var socketConnection = LocalizationManager.PrepareForScan(wss, GpsProvider.GetCurrentLocation());
-
+            
             try
             {
+                // Providers
+                var gpsPrescan = GpsProvider.PrepareForScan(cancellationToken);
+                var posePrescan = PoseProvider.PrepareForScan(cancellationToken);
+                var videoPrescan = VideoProvider.PrepareForScan(cancellationToken);
+
+                // Session
+                var sessionVerification = VerifySession(cancellationToken).CancelOnFaulted(_preScanCTS);
+
+                // Socket
+                WebSocketService wss = new WebSocketService(ServerInfo.WebSocketServiceUrl, _token, Config.Locale);
+                var socketConnection = LocalizationManager.PrepareForScan(wss, GpsProvider.GetCurrentLocation());
+
                 await sessionVerification;
                 SturfeeDebug.Log("Session verification complete");
                 await gpsPrescan;

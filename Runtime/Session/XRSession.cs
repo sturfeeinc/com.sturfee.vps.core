@@ -151,7 +151,15 @@ namespace SturfeeVPS.Core
         internal async Task CreateSession()
         {
             _sessionCTS = new CancellationTokenSource();
-            await _sessionInternal.CreateSession(_sessionCTS.Token);
+            try
+            {
+                await _sessionInternal.CreateSession(_sessionCTS.Token);
+            }
+            catch (Exception ex)
+            {
+                SturfeeDebug.LogError($" ERROR => CreateSession :: {ex.Message}" );
+                throw;
+            }
         }
 
         internal void DestroySession()
