@@ -52,6 +52,7 @@ message Response {
     Position position = 1;
     Quaternion yaw_offset_quaternion = 2;
     Quaternion pitch_offset_quaternion = 3;
+    OffsetEuler euler_offset = 4;
 }
 message Error {
     enum ErrorCodes {
@@ -70,4 +71,10 @@ message ResponseMessage {
     string tracking_id = 2;
     Response response = 3;
     Error error = 4;
+}
+
+message OffsetEuler {
+    double yawOffset = 1;
+    double rollOffset = 2;
+    double pitchOffset = 3;
 }

@@ -48,11 +48,17 @@ namespace SturfeeVPS.Core
 
         public Quaternion GetXRCameraOrientation()
         {
-            var yaw = YawOrientationCorrection;
             var sensor = XRSessionManager.GetSession().PoseProvider.GetOrientation();
-            var pitch = PitchOrientationCorrection;
 
-            return yaw * sensor * pitch;
+            if (PlayerPrefs.GetInt("SturfeeVPS.Offset.UseEuler", 0) == 0)
+            {
+                var yaw = YawOrientationCorrection;
+                var pitch = PitchOrientationCorrection;
+
+                return yaw * sensor * pitch;
+            }
+            Quaternion offset = Quaternion.Euler(EulerOrientationCorrection);
+            return offset * sensor ;            
         }
 
         public Vector3 GetLocationOffset()
@@ -84,9 +90,11 @@ namespace SturfeeVPS.Core
 
         public Quaternion GetOrientationOffset()
         {
-            var offset = GetXRCameraOrientation();
-            var poseInverse = Quaternion.Inverse(XRSessionManager.GetSession().PoseProvider.GetOrientation());
-            return offset * poseInverse;
+            var corrected = GetXRCameraOrientation();
+            var sensorInverse = Quaternion.Inverse(XRSessionManager.GetSession().PoseProvider.GetOrientation());
+
+            // => remove sensor orientatino from corrected to get only the offset applied
+            return corrected * sensorInverse;
         }
 
         private Vector3 Rotate(Vector3 point)

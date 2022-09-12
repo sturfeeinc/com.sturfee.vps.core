@@ -14,6 +14,7 @@ namespace SturfeeVPS.Core
     {
         public Quaternion YawOrientationCorrection { get; private set; }
         public Quaternion PitchOrientationCorrection { get; private set; }
+        public Vector3 EulerOrientationCorrection { get; private set; }
         public GeoLocation LocationCorrection { get; private set; }
 
         public List<Scanner> Scans;   // number of scans in this session
@@ -176,7 +177,18 @@ namespace SturfeeVPS.Core
                 (float)responseMessage.Response.PitchOffsetQuaternion.W
             );
 
-            PitchOrientationCorrection *= pitch;
+            var eulerOffset = new Vector3
+            {
+                x = (float)responseMessage.Response.EulerOffset.PitchOffset,
+                y = (float)responseMessage.Response.EulerOffset.RollOffset,
+                z = (float)responseMessage.Response.EulerOffset.YawOffset
+            };
+
+            EulerOrientationCorrection += eulerOffset;
+            SturfeeDebug.Log($" Euler offset : {EulerOrientationCorrection}");
+
+
+          PitchOrientationCorrection *= pitch;
 
             LocationCorrection = new GeoLocation
             {

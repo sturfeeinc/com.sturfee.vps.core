@@ -100,8 +100,9 @@ namespace SturfeeVPS.Core
                     importOptions.DataLoader = null;
                 }
             }
-            catch
+            catch(Exception e)
             {
+                Debug.LogException(e);
                 throw new IdException(ErrorMessages.TileLoadingError);
             }
         }

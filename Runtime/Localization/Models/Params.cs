@@ -40,21 +40,24 @@ namespace SturfeeVPS.Core.Proto {
             "VlBTLkNvcmUuUHJvdG8uSW50ZXJuYWxQYXJhbWV0ZXJzEhsKE3RvdGFsX251",
             "bV9vZl9mcmFtZXMYBSABKA0SEwoLZnJhbWVfb3JkZXIYBiABKA0SEwoLdHJh",
             "Y2tpbmdfaWQYByABKAkSFAoMc291cmNlX2ltYWdlGAkgASgMEg8KB3NpdGVf",
-            "aWQYCiABKAkSEgoKZGV2X3JhZGl1cxgUIAEoAyLDAQoIUmVzcG9uc2USMQoI",
+            "aWQYCiABKAkSEgoKZGV2X3JhZGl1cxgUIAEoAyL9AQoIUmVzcG9uc2USMQoI",
             "cG9zaXRpb24YASABKAsyHy5TdHVyZmVlVlBTLkNvcmUuUHJvdG8uUG9zaXRp",
             "b24SQAoVeWF3X29mZnNldF9xdWF0ZXJuaW9uGAIgASgLMiEuU3R1cmZlZVZQ",
             "Uy5Db3JlLlByb3RvLlF1YXRlcm5pb24SQgoXcGl0Y2hfb2Zmc2V0X3F1YXRl",
             "cm5pb24YAyABKAsyIS5TdHVyZmVlVlBTLkNvcmUuUHJvdG8uUXVhdGVybmlv",
-            "biLSAQoFRXJyb3ISNQoEY29kZRgBIAEoDjInLlN0dXJmZWVWUFMuQ29yZS5Q",
-            "cm90by5FcnJvci5FcnJvckNvZGVzEg8KB21lc3NhZ2UYAiABKAkigAEKCkVy",
-            "cm9yQ29kZXMSDAoITk9fRVJST1IQABIcChdVTkVYUEVDVEVEX1NFUlZFUl9F",
-            "UlJPUhDbKBITCg5QUk9UT0NPTF9FUlJPUhDcKBIVChBWQUxJREFUSU9OX0VS",
-            "Uk9SEN0oEhoKFU9VVF9PRl9DT1ZFUkFHRV9FUlJPUhDeKCKaAQoPUmVzcG9u",
-            "c2VNZXNzYWdlEhIKCnJlcXVlc3RfaWQYASABKA0SEwoLdHJhY2tpbmdfaWQY",
-            "AiABKAkSMQoIcmVzcG9uc2UYAyABKAsyHy5TdHVyZmVlVlBTLkNvcmUuUHJv",
-            "dG8uUmVzcG9uc2USKwoFZXJyb3IYBCABKAsyHC5TdHVyZmVlVlBTLkNvcmUu",
-            "UHJvdG8uRXJyb3IqPgoRT3BlcmF0aW9uTWVzc2FnZXMSDwoLVU5TVVBQT1JU",
-            "RUQQABINCglBTElHTk1FTlQQBBIJCgVSRUxPQxAFYgZwcm90bzM="));
+            "bhI4CgxldWxlcl9vZmZzZXQYBCABKAsyIi5TdHVyZmVlVlBTLkNvcmUuUHJv",
+            "dG8uT2Zmc2V0RXVsZXIi0gEKBUVycm9yEjUKBGNvZGUYASABKA4yJy5TdHVy",
+            "ZmVlVlBTLkNvcmUuUHJvdG8uRXJyb3IuRXJyb3JDb2RlcxIPCgdtZXNzYWdl",
+            "GAIgASgJIoABCgpFcnJvckNvZGVzEgwKCE5PX0VSUk9SEAASHAoXVU5FWFBF",
+            "Q1RFRF9TRVJWRVJfRVJST1IQ2ygSEwoOUFJPVE9DT0xfRVJST1IQ3CgSFQoQ",
+            "VkFMSURBVElPTl9FUlJPUhDdKBIaChVPVVRfT0ZfQ09WRVJBR0VfRVJST1IQ",
+            "3igimgEKD1Jlc3BvbnNlTWVzc2FnZRISCgpyZXF1ZXN0X2lkGAEgASgNEhMK",
+            "C3RyYWNraW5nX2lkGAIgASgJEjEKCHJlc3BvbnNlGAMgASgLMh8uU3R1cmZl",
+            "ZVZQUy5Db3JlLlByb3RvLlJlc3BvbnNlEisKBWVycm9yGAQgASgLMhwuU3R1",
+            "cmZlZVZQUy5Db3JlLlByb3RvLkVycm9yIkkKC09mZnNldEV1bGVyEhEKCXlh",
+            "d09mZnNldBgBIAEoARISCgpyb2xsT2Zmc2V0GAIgASgBEhMKC3BpdGNoT2Zm",
+            "c2V0GAMgASgBKj4KEU9wZXJhdGlvbk1lc3NhZ2VzEg8KC1VOU1VQUE9SVEVE",
+            "EAASDQoJQUxJR05NRU5UEAQSCQoFUkVMT0MQBWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::SturfeeVPS.Core.Proto.OperationMessages), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -63,9 +66,10 @@ namespace SturfeeVPS.Core.Proto {
             new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.ExternalParameters), global::SturfeeVPS.Core.Proto.ExternalParameters.Parser, new[]{ "Position", "Quaternion" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.InternalParameters), global::SturfeeVPS.Core.Proto.InternalParameters.Parser, new[]{ "SceneHeight", "SceneWidth", "Fov", "ProjectionMatrix" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.Request), global::SturfeeVPS.Core.Proto.Request.Parser, new[]{ "Operation", "RequestId", "ExternalParameters", "InternalParameters", "TotalNumOfFrames", "FrameOrder", "TrackingId", "SourceImage", "SiteId", "DevRadius" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.Response), global::SturfeeVPS.Core.Proto.Response.Parser, new[]{ "Position", "YawOffsetQuaternion", "PitchOffsetQuaternion" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.Response), global::SturfeeVPS.Core.Proto.Response.Parser, new[]{ "Position", "YawOffsetQuaternion", "PitchOffsetQuaternion", "EulerOffset" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.Error), global::SturfeeVPS.Core.Proto.Error.Parser, new[]{ "Code", "Message" }, null, new[]{ typeof(global::SturfeeVPS.Core.Proto.Error.Types.ErrorCodes) }, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.ResponseMessage), global::SturfeeVPS.Core.Proto.ResponseMessage.Parser, new[]{ "RequestId", "TrackingId", "Response", "Error" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.ResponseMessage), global::SturfeeVPS.Core.Proto.ResponseMessage.Parser, new[]{ "RequestId", "TrackingId", "Response", "Error" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::SturfeeVPS.Core.Proto.OffsetEuler), global::SturfeeVPS.Core.Proto.OffsetEuler.Parser, new[]{ "YawOffset", "RollOffset", "PitchOffset" }, null, null, null, null)
           }));
     }
     #endregion
@@ -1756,6 +1760,7 @@ namespace SturfeeVPS.Core.Proto {
       position_ = other.position_ != null ? other.position_.Clone() : null;
       yawOffsetQuaternion_ = other.yawOffsetQuaternion_ != null ? other.yawOffsetQuaternion_.Clone() : null;
       pitchOffsetQuaternion_ = other.pitchOffsetQuaternion_ != null ? other.pitchOffsetQuaternion_.Clone() : null;
+      eulerOffset_ = other.eulerOffset_ != null ? other.eulerOffset_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1801,6 +1806,18 @@ namespace SturfeeVPS.Core.Proto {
       }
     }
 
+    /// <summary>Field number for the "euler_offset" field.</summary>
+    public const int EulerOffsetFieldNumber = 4;
+    private global::SturfeeVPS.Core.Proto.OffsetEuler eulerOffset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::SturfeeVPS.Core.Proto.OffsetEuler EulerOffset {
+      get { return eulerOffset_; }
+      set {
+        eulerOffset_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -1819,6 +1836,7 @@ namespace SturfeeVPS.Core.Proto {
       if (!object.Equals(Position, other.Position)) return false;
       if (!object.Equals(YawOffsetQuaternion, other.YawOffsetQuaternion)) return false;
       if (!object.Equals(PitchOffsetQuaternion, other.PitchOffsetQuaternion)) return false;
+      if (!object.Equals(EulerOffset, other.EulerOffset)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1829,6 +1847,7 @@ namespace SturfeeVPS.Core.Proto {
       if (position_ != null) hash ^= Position.GetHashCode();
       if (yawOffsetQuaternion_ != null) hash ^= YawOffsetQuaternion.GetHashCode();
       if (pitchOffsetQuaternion_ != null) hash ^= PitchOffsetQuaternion.GetHashCode();
+      if (eulerOffset_ != null) hash ^= EulerOffset.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1859,6 +1878,10 @@ namespace SturfeeVPS.Core.Proto {
         output.WriteRawTag(26);
         output.WriteMessage(PitchOffsetQuaternion);
       }
+      if (eulerOffset_ != null) {
+        output.WriteRawTag(34);
+        output.WriteMessage(EulerOffset);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1881,6 +1904,10 @@ namespace SturfeeVPS.Core.Proto {
         output.WriteRawTag(26);
         output.WriteMessage(PitchOffsetQuaternion);
       }
+      if (eulerOffset_ != null) {
+        output.WriteRawTag(34);
+        output.WriteMessage(EulerOffset);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1899,6 +1926,9 @@ namespace SturfeeVPS.Core.Proto {
       }
       if (pitchOffsetQuaternion_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(PitchOffsetQuaternion);
+      }
+      if (eulerOffset_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(EulerOffset);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1929,6 +1959,12 @@ namespace SturfeeVPS.Core.Proto {
           PitchOffsetQuaternion = new global::SturfeeVPS.Core.Proto.Quaternion();
         }
         PitchOffsetQuaternion.MergeFrom(other.PitchOffsetQuaternion);
+      }
+      if (other.eulerOffset_ != null) {
+        if (eulerOffset_ == null) {
+          EulerOffset = new global::SturfeeVPS.Core.Proto.OffsetEuler();
+        }
+        EulerOffset.MergeFrom(other.EulerOffset);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1966,6 +2002,13 @@ namespace SturfeeVPS.Core.Proto {
             input.ReadMessage(PitchOffsetQuaternion);
             break;
           }
+          case 34: {
+            if (eulerOffset_ == null) {
+              EulerOffset = new global::SturfeeVPS.Core.Proto.OffsetEuler();
+            }
+            input.ReadMessage(EulerOffset);
+            break;
+          }
         }
       }
     #endif
@@ -2000,6 +2043,13 @@ namespace SturfeeVPS.Core.Proto {
               PitchOffsetQuaternion = new global::SturfeeVPS.Core.Proto.Quaternion();
             }
             input.ReadMessage(PitchOffsetQuaternion);
+            break;
+          }
+          case 34: {
+            if (eulerOffset_ == null) {
+              EulerOffset = new global::SturfeeVPS.Core.Proto.OffsetEuler();
+            }
+            input.ReadMessage(EulerOffset);
             break;
           }
         }
@@ -2560,6 +2610,269 @@ namespace SturfeeVPS.Core.Proto {
               Error = new global::SturfeeVPS.Core.Proto.Error();
             }
             input.ReadMessage(Error);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  public sealed partial class OffsetEuler : pb::IMessage<OffsetEuler>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<OffsetEuler> _parser = new pb::MessageParser<OffsetEuler>(() => new OffsetEuler());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<OffsetEuler> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::SturfeeVPS.Core.Proto.ParamsReflection.Descriptor.MessageTypes[8]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public OffsetEuler() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public OffsetEuler(OffsetEuler other) : this() {
+      yawOffset_ = other.yawOffset_;
+      rollOffset_ = other.rollOffset_;
+      pitchOffset_ = other.pitchOffset_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public OffsetEuler Clone() {
+      return new OffsetEuler(this);
+    }
+
+    /// <summary>Field number for the "yawOffset" field.</summary>
+    public const int YawOffsetFieldNumber = 1;
+    private double yawOffset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public double YawOffset {
+      get { return yawOffset_; }
+      set {
+        yawOffset_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "rollOffset" field.</summary>
+    public const int RollOffsetFieldNumber = 2;
+    private double rollOffset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public double RollOffset {
+      get { return rollOffset_; }
+      set {
+        rollOffset_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "pitchOffset" field.</summary>
+    public const int PitchOffsetFieldNumber = 3;
+    private double pitchOffset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public double PitchOffset {
+      get { return pitchOffset_; }
+      set {
+        pitchOffset_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as OffsetEuler);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(OffsetEuler other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(YawOffset, other.YawOffset)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(RollOffset, other.RollOffset)) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(PitchOffset, other.PitchOffset)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (YawOffset != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(YawOffset);
+      if (RollOffset != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(RollOffset);
+      if (PitchOffset != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(PitchOffset);
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (YawOffset != 0D) {
+        output.WriteRawTag(9);
+        output.WriteDouble(YawOffset);
+      }
+      if (RollOffset != 0D) {
+        output.WriteRawTag(17);
+        output.WriteDouble(RollOffset);
+      }
+      if (PitchOffset != 0D) {
+        output.WriteRawTag(25);
+        output.WriteDouble(PitchOffset);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (YawOffset != 0D) {
+        output.WriteRawTag(9);
+        output.WriteDouble(YawOffset);
+      }
+      if (RollOffset != 0D) {
+        output.WriteRawTag(17);
+        output.WriteDouble(RollOffset);
+      }
+      if (PitchOffset != 0D) {
+        output.WriteRawTag(25);
+        output.WriteDouble(PitchOffset);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (YawOffset != 0D) {
+        size += 1 + 8;
+      }
+      if (RollOffset != 0D) {
+        size += 1 + 8;
+      }
+      if (PitchOffset != 0D) {
+        size += 1 + 8;
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(OffsetEuler other) {
+      if (other == null) {
+        return;
+      }
+      if (other.YawOffset != 0D) {
+        YawOffset = other.YawOffset;
+      }
+      if (other.RollOffset != 0D) {
+        RollOffset = other.RollOffset;
+      }
+      if (other.PitchOffset != 0D) {
+        PitchOffset = other.PitchOffset;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 9: {
+            YawOffset = input.ReadDouble();
+            break;
+          }
+          case 17: {
+            RollOffset = input.ReadDouble();
+            break;
+          }
+          case 25: {
+            PitchOffset = input.ReadDouble();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 9: {
+            YawOffset = input.ReadDouble();
+            break;
+          }
+          case 17: {
+            RollOffset = input.ReadDouble();
+            break;
+          }
+          case 25: {
+            PitchOffset = input.ReadDouble();
             break;
           }
         }
