@@ -12,14 +12,7 @@ namespace SturfeeVPS.Core
 {
     internal partial class LocalizationManager
     {
-        public Quaternion YawOrientationCorrection { get; private set; }
-        public Quaternion PitchOrientationCorrection { get; private set; }
-        public Vector3 EulerOrientationCorrection { get; private set; }
-        public GeoLocation LocationCorrection { get; private set; }
-
-        public List<Scanner> Scans;   // number of scans in this session
-
-        private WebSocketService _webSocketService;
+        public List<IScanner> Scans;   // number of scans in this session
 
         // Request
         private int _requestNum = 0;
@@ -29,37 +22,41 @@ namespace SturfeeVPS.Core
         // Response
         private string _trackingId;
 
-        private Scanner _currentScanner;
-        
-        private Coroutine _scanRoutine;
-
-        public LocalizationManager()
+        private IScanner _scanner;
+        private OffsetType _offsetType = OffsetType.Quaternion;
+        private bool _accumulateOffsets = false;
+        public LocalizationManager(bool accumulateOffsets = false)
         {
             YawOrientationCorrection = Quaternion.identity;
             PitchOrientationCorrection = Quaternion.identity;
+            EulerOrientationCorrection = Vector3.zero;
 
-            Scans = new List<Scanner>();
+            Scans = new List<IScanner>();
+            _accumulateOffsets = accumulateOffsets;
         }
 
-        public async Task PrepareForScan(WebSocketService webSocketService, GeoLocation location)
+        public async Task ConnectScanner(ScanType scanType, ScanConfig scanConfig, GeoLocation location, string accessToken, string language = "en-US")
         {
-
-            if(_webSocketService != null)
+            if(_scanner != null)
             {
-                if (_webSocketService.IsConnected)
-                {
-                    SturfeeDebug.Log($"Previous Socket connection was not closed correctly. Closing it now..");
-                    _webSocketService.Close();
-                }
-
-                _webSocketService = null;
+                _scanner.Disconnect();
+                _scanner = null;
             }
 
-            _webSocketService = webSocketService;
+            switch (scanType)
+            {
+                case ScanType.Satellite:
+                    _scanner = new SatelliteScanner(scanConfig);
+                    break;
+                case ScanType.HD:
+                    _scanner = new HDScanner(scanConfig);
+                    break;
+            }
 
             try
             {
-                await _webSocketService.Connect(location.Latitude, location.Longitude);
+                await _scanner.Connect(location, accessToken, language);
+                _scanner.OnLocalizationResponse += OnLocalizationResonse;
             }
             catch (Exception ex)
             {
@@ -68,86 +65,47 @@ namespace SturfeeVPS.Core
             }
         }
 
-        public void PerformLocalization(ScanType scanType, LocalizationMode localizationMode = LocalizationMode.WebServer)
+        public void StartScan(LocalizationMode localizationMode = LocalizationMode.WebServer)
         {
-            if(localizationMode == LocalizationMode.Local)
+            if (localizationMode == LocalizationMode.Local)
             {
                 AlignLocally();
-                return;                   
-            }
-
-            XRSession xRSession = XRSessionManager.GetSession();
-            if(xRSession.Status < XRSessionStatus.Ready)
-            {
-                SturfeeEventManager.Instance.LocalizationFail(ErrorMessages.SessionNotReady);
                 return;
             }
 
-            if(_scanRoutine != null)
+            if (_scanner == null)
             {
-                StopScan();
+                Debug.LogError($"LocalizationManager :: Cannot perform localization. Scanner is NULL !");
+                return;
             }
 
-            _scanRoutine = xRSession.StartCoroutine(PerformLocalizationAsync(scanType).AsCoroutine());            
+            _requestNum++;
+            _trackingOrigin = XRSessionManager.GetSession().PoseProvider.GetPosition();
+            _requestId = (_requestNum * 10) + (int)OperationMessages.Alignment;
+
+            _scanner.StartScan(_requestId);
+
+            Scans.Add(_scanner);
         }
 
-        public void CancelScan() 
-        {
-            _webSocketService?.Close();
-            _webSocketService = null;
-        }
-        
         public void StopScan()
         {
-            if (_scanRoutine != null)
-            {
-                XRSessionManager.GetSession().StopCoroutine(_scanRoutine);
-                _scanRoutine = null;
-            }
-
+            _scanner?.StopScan();
         }
 
+        public void DisconnectScanner()
+        {
+            _scanner?.Disconnect();
+        }
+        
         public void DisableVPS()
         {
-            CancelScan();
+            DisconnectScanner();
             ResetOffsets();
         }
 
-        private async Task PerformLocalizationAsync(ScanType scanType)
-        {
-            _requestNum++;
-            _trackingOrigin = XRSessionManager.GetSession().PoseProvider.GetPosition();
-
-            if (scanType == ScanType.Satellite)
-            {
-                _requestId = (_requestNum * 10) + (int)OperationMessages.Alignment;
-                _currentScanner = new SatelliteScanner(_requestId, _webSocketService, OnLocalizationResonse);
-            }
-            else
-            {
-                SturfeeDebug.LogError("Scan Error" + scanType.ToString() + " scanner not yet available");
-                SturfeeEventManager.Instance.LocalizationFail(ErrorMessages.ServerError);                
-                return;
-            }
-
-            Scans.Add(_currentScanner);
-
-            try
-            {
-                await _currentScanner.StartScan();
-            }
-            catch (IdException e)
-            {
-                SturfeeEventManager.Instance.LocalizationFail(e.IdError);
-            }
-            
-        }
-
-        private void OnLocalizationResonse(ResponseMessage responseMessage)
+        private void OnLocalizationResonse(ResponseMessage responseMessage, OffsetType _offsetType)
         {            
-            _webSocketService.Close();
-            _webSocketService = null;
-
             if (responseMessage.Error != null)
             {
                 SturfeeDebug.LogError("Server Error : " + responseMessage.Error);
@@ -158,7 +116,6 @@ namespace SturfeeVPS.Core
                 return;
             }
 
-
             _trackingId = responseMessage.TrackingId;
 
             var yaw = new Quaternion(
@@ -168,8 +125,6 @@ namespace SturfeeVPS.Core
                 (float)responseMessage.Response.YawOffsetQuaternion.W
             );
 
-            YawOrientationCorrection = yaw * YawOrientationCorrection;
-
             var pitch = new Quaternion(
                 (float)responseMessage.Response.PitchOffsetQuaternion.X,
                 (float)responseMessage.Response.PitchOffsetQuaternion.Y,
@@ -177,18 +132,20 @@ namespace SturfeeVPS.Core
                 (float)responseMessage.Response.PitchOffsetQuaternion.W
             );
 
-            var eulerOffset = new Vector3
+            Vector3 eulerOffset = Vector3.zero;
+            if (responseMessage.Response.EulerOffset != null)
             {
-                x = (float)responseMessage.Response.EulerOffset.PitchOffset,
-                y = (float)responseMessage.Response.EulerOffset.RollOffset,
-                z = (float)responseMessage.Response.EulerOffset.YawOffset
-            };
+                eulerOffset = new Vector3
+                {
+                    x = (float)responseMessage.Response.EulerOffset.PitchOffset,
+                    y = (float)responseMessage.Response.EulerOffset.RollOffset,
+                    z = (float)responseMessage.Response.EulerOffset.YawOffset
+                };
 
-            EulerOrientationCorrection += eulerOffset;
-            SturfeeDebug.Log($" Euler offset : {EulerOrientationCorrection}");
+                EulerOrientationCorrection = eulerOffset;
+                SturfeeDebug.Log($" Euler offset : {EulerOrientationCorrection}");
+            }
 
-
-          PitchOrientationCorrection *= pitch;
 
             LocationCorrection = new GeoLocation
             {
@@ -197,17 +154,24 @@ namespace SturfeeVPS.Core
                 Altitude = responseMessage.Response.Position.Height
             };
 
-            _currentScanner.Response = new LocalizationResponse
+            if (_accumulateOffsets)
             {
-                location = LocationCorrection,
-                yawOrientationCorrection = yaw,
-                pitchOrientationCorrection = pitch
-            };
+                YawOrientationCorrection = yaw * YawOrientationCorrection;
+                PitchOrientationCorrection *= PitchOrientationCorrection;
+                EulerOrientationCorrection += eulerOffset;
+            }
+            else
+            {
+                YawOrientationCorrection = yaw;
+                PitchOrientationCorrection = pitch;
+                EulerOrientationCorrection = eulerOffset;
+            }
 
+            _offsetType = _scanner.OffsetType;
+            SturfeeDebug.Log($"Localization completed using {_scanner.ScanType} Scanner. Applying {_scanner.OffsetType} offsets");
 
             JsonFormatter jsonFormatter = new JsonFormatter(JsonFormatter.Settings.Default);
             SturfeeDebug.Log(jsonFormatter.Format(responseMessage));
-
 
             SturfeeEventManager.Instance.LocalizationSuccessful();
         }
@@ -235,6 +199,7 @@ namespace SturfeeVPS.Core
         {
             YawOrientationCorrection = Quaternion.identity;
             PitchOrientationCorrection = Quaternion.identity;
+            EulerOrientationCorrection = Vector3.zero;
         }
     }
 }

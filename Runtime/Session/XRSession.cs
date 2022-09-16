@@ -85,19 +85,20 @@ namespace SturfeeVPS.Core
         /// <summary>
         /// Begins the process to perform localization to enable VPS on current session
         /// </summary>
-        public void EnableVPS()
+        /// <param name="scanType">The type of scan to be performed</param>
+        public void EnableVPS(ScanType scanType, ScanConfig scanConfig = null)
         {
-            _sessionInternal.EnableVPS();
+            _sessionInternal.EnableVPS(scanType, scanConfig);
         }
 
         /// <summary>
         /// Performs localization by capturing multiple frames
         /// </summary>
-        /// <param name="scanType">The type of scan to be performed</param>
+        /// <param name="scanConfig">Any additional scan related config</param>
         /// <param name="localizationMode"></param>
-        public void PerformLocalization(ScanType scanType, LocalizationMode localizationMode = LocalizationMode.WebServer)
+        public void PerformLocalization(LocalizationMode localizationMode = LocalizationMode.WebServer)
         {
-            _sessionInternal.PerformLocalization(scanType, localizationMode);
+            _sessionInternal.PerformLocalization(localizationMode);
         }
 
         /// <summary>

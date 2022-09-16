@@ -6,6 +6,10 @@ namespace SturfeeVPS.Core
     internal partial class LocalizationManager
     {
         public static readonly float CAMERA_HEIGHT = 1.5f;
+        public Quaternion YawOrientationCorrection { get; private set; }
+        public Quaternion PitchOrientationCorrection { get; private set; }
+        public Vector3 EulerOrientationCorrection { get; private set; }
+        public GeoLocation LocationCorrection { get; private set; }
 
         private float _terrainElevation;
         private float TerrainElevation
@@ -50,7 +54,7 @@ namespace SturfeeVPS.Core
         {
             var sensor = XRSessionManager.GetSession().PoseProvider.GetOrientation();
 
-            if (PlayerPrefs.GetInt("SturfeeVPS.Offset.UseEuler", 0) == 0)
+            if (_offsetType == OffsetType.Quaternion)
             {
                 var yaw = YawOrientationCorrection;
                 var pitch = PitchOrientationCorrection;

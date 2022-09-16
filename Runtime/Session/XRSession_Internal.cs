@@ -37,7 +37,7 @@ namespace SturfeeVPS.Core
             {
                 if(_gpsProvider == null)
                 {
-                    _gpsProvider = Config.GpsProvider;
+                    _gpsProvider = new LocationProvider(Config.GpsProvider);
                     _gpsProvider.Initialize();
                 }
                 return _gpsProvider; 
@@ -143,16 +143,18 @@ namespace SturfeeVPS.Core
         public Quaternion GetOrientationOffset()
         {
             return LocalizationManager.GetOrientationOffset();
-        }        
-
-        public async void EnableVPS()
-        {
-            await PrepareForScan();
         }
 
-        public void PerformLocalization(ScanType scanType, LocalizationMode localizationMode = LocalizationMode.WebServer)
+        public Vector3 GetEulerOffset => LocalizationManager.EulerOrientationCorrection;
+
+        public async void EnableVPS(ScanType scanType, ScanConfig scanConfig = null)
         {
-            LocalizationManager.PerformLocalization(scanType, localizationMode);
+            await PrepareForScan(scanType, scanConfig);
+        }
+
+        public void PerformLocalization(LocalizationMode localizationMode = LocalizationMode.WebServer)
+        {
+            LocalizationManager.StartScan(localizationMode);
         }
 
         public void CancelVPS()
@@ -160,7 +162,7 @@ namespace SturfeeVPS.Core
             if (Status <= XRSessionStatus.Ready)
             {
                 _preScanCTS?.Cancel();
-                LocalizationManager.CancelScan();
+                LocalizationManager.DisconnectScanner();
             }
             else if (Status == XRSessionStatus.Scanning || Status == XRSessionStatus.Loading)
             {
@@ -419,7 +421,7 @@ namespace SturfeeVPS.Core
             return _sessionGO;
         }
 
-        private async Task PrepareForScan()
+        private async Task PrepareForScan(ScanType scanType, ScanConfig scanConfig = null)
         {
             _preScanCTS = new CancellationTokenSource();
             var cancellationToken = _preScanCTS.Token;
@@ -434,9 +436,8 @@ namespace SturfeeVPS.Core
                 // Session
                 var sessionVerification = VerifySession(cancellationToken).CancelOnFaulted(_preScanCTS);
 
-                // Socket
-                WebSocketService wss = new WebSocketService(ServerInfo.WebSocketServiceUrl, _token, Config.Locale);
-                var socketConnection = LocalizationManager.PrepareForScan(wss, GpsProvider.GetCurrentLocation());
+                // Scanner socket connection                
+                var scannerConnection = CreateScannerAndOpenSocketConnection(scanType, scanConfig).CancelOnFaulted(_preScanCTS);
 
                 await sessionVerification;
                 SturfeeDebug.Log("Session verification complete");
@@ -446,7 +447,7 @@ namespace SturfeeVPS.Core
                 SturfeeDebug.Log("Pose pre-scan complete");
                 await videoPrescan;
                 SturfeeDebug.Log("Video pre-scan complete");
-                await socketConnection;
+                await scannerConnection;
                 SturfeeDebug.Log("Socket connection verified");
 
                 SturfeeEventManager.Instance.ReadyForScan();           
@@ -498,6 +499,25 @@ namespace SturfeeVPS.Core
                     await CreateSession(ct);
                 }
             }
+        }
+
+        private async Task CreateScannerAndOpenSocketConnection(ScanType scanType, ScanConfig scanConfig)
+        {
+            GeoLocation location;   // This location is used during socket connection
+            if (GpsProvider.GetProviderStatus() == ProviderStatus.Ready)
+            {
+                location = GpsProvider.GetCurrentLocation();
+            }
+            else
+            {
+#if UNITY_EDITOR
+                location = new GeoLocation { Latitude = 37.332093d, Longitude = -121.890137d };
+#else
+                location = new GeoLocation(Input.location.lastData);
+#endif
+            }
+
+            await LocalizationManager.ConnectScanner(scanType, scanConfig, location, _token, Config.Locale);
         }
 
         private void LoadSessionConfig(XRSessionConfig config)

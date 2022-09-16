@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SturfeeVPS.Core
 {
-    internal class WebSocketService
+    internal class LocalizationService
     {
         public static readonly string STATUS_SUCCESS = "success";
         public static readonly string STATUS_OK = "ok";
@@ -14,14 +14,14 @@ namespace SturfeeVPS.Core
         private DateTime _requestTimestamp;
         private string _language = "en-US";
 
-        public WebSocketService() { }
+        public LocalizationService() { }
 
-        public WebSocketService(string url)
+        public LocalizationService(string url)
         {
             _uri = new Uri(url);
         }
 
-        public WebSocketService(string url, string accessToken, string language = "en-US")
+        public LocalizationService(string url, string accessToken, string language = "en-US")
         {
             _accessToken = accessToken;
             _uri = new Uri(url);
@@ -35,18 +35,7 @@ namespace SturfeeVPS.Core
 
         public async Task Connect(double latitude, double longitude)
         {
-            SturfeeDebug.Log($"Opening socket connection at {Uri}");
-
-            //string language = "en-US";
-            //switch (Language.CurrentLanguage)
-            //{
-            //    case Languages.English:
-            //        language = "en-US";
-            //        break;
-            //    case Languages.Japanese:
-            //        language = "ja";
-            //        break;
-            //}
+            SturfeeDebug.Log($"Opening socket connection at {Uri} \t Latitude : {latitude} , Longitude : {longitude}");
 
             _socket = new WebSocket(Uri);
             var authHeaders = new Dictionary<string, string> {
