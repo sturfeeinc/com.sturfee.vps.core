@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace SturfeeVPS.Core
 {
+    [Serializable]
     public class XRSession 
     {
         internal string SessionId;
@@ -169,19 +170,39 @@ namespace SturfeeVPS.Core
             _sessionInternal?.DestroySession();
         }
 
-        internal async Task ValidateToken()
+        internal async Task WaitForGps(CancellationToken ct = default)
         {
-            await _sessionInternal.ValidateToken();
+            await _sessionInternal.WaitForGps(ct);
         }
 
-        internal async Task CheckCoverage()
+        internal async Task WaitForPose(CancellationToken ct = default)
         {
-            await _sessionInternal.CheckCoverage();
+            await _sessionInternal.WaitForPose(ct);
         }
 
-        internal async Task LoadTiles()
+        internal async Task WaitForVideo(CancellationToken ct = default)
         {
-            await _sessionInternal.LoadTiles();
+            await _sessionInternal.WaitForVideo(ct);
+        }
+
+        internal async Task ValidateToken(GeoLocation location = null)
+        {
+            await _sessionInternal.ValidateToken(location);
+        }
+
+        internal async Task CheckCoverage(GeoLocation location = null)
+        {
+            await _sessionInternal.CheckCoverage(location);
+        }
+
+        internal async Task LoadTiles(GeoLocation location = null)
+        {
+            await _sessionInternal.LoadTiles(location);
+        }
+
+        internal GeoLocation GetFallbackLocation()
+        {
+            return _sessionInternal.GetFallbackLocation();
         }
 
         internal float GetTerrainElevation()

@@ -20,10 +20,6 @@ namespace SturfeeVPS.Core
 
         private string _token;
         private GameObject _sessionGO;
-        
-        private bool _tokenValidated;
-        private bool _coverageChecked;
-        private bool _tilesLoaded;
 
         private CancellationTokenSource _preScanCTS;
 
@@ -87,24 +83,22 @@ namespace SturfeeVPS.Core
                 Uri uri = new Uri(ServerInfo.SturfeeAPI);
                 SturfeeDebug.Log("Pointing to endpoint : " + uri.Host);
 
-                await WaitForGps(ct);
                 await CheckConnection();
 
-                var location = GpsProvider.GetCurrentLocation();
+                var location = await GetLocation(ct);
+                CenterRef = location;
+                PositioningUtils.Init(location);
+
                 SturfeeDebug.Log("Start Location : " + location.ToFormattedString());
 
                 await ValidateToken(location);
                 await CheckCoverage(location);
                 await LoadTiles(location, ct);
-
-                //await LocalizationManager.OpenWebsocketConnection(location);
-
                 await WaitForVideo(ct);
                 await WaitForPose(ct);
 
                 SturfeeDebug.Log("Session ready");
-                SturfeeEventManager.Instance.SessionIsReady();
-
+                SturfeeEventManager.Instance.SessionIsReady();                
             }
             catch (Exception e)
             {
@@ -149,7 +143,44 @@ namespace SturfeeVPS.Core
 
         public async void EnableVPS(ScanType scanType, ScanConfig scanConfig = null)
         {
-            await PrepareForScan(scanType, scanConfig);
+            _preScanCTS = new CancellationTokenSource();
+            var cancellationToken = _preScanCTS.Token;
+
+            try
+            {
+                await LocalizationManager.InitializeScan(scanType, scanConfig, _token, Config.Locale, cancellationToken);
+                await VerifySession(cancellationToken);
+
+                SturfeeEventManager.Instance.ReadyForScan();
+            }
+            catch (Exception e)
+            {
+                if (e is SessionException se)
+                {
+                    SturfeeEventManager.Instance.LocalizationFail(se.IdError);
+                }
+                else if (e is IdException ie)
+                {
+                    SturfeeEventManager.Instance.LocalizationFail(ie.IdError);
+                }
+                else if (e is OperationCanceledException)
+                {
+                    SturfeeDebug.Log("OperationCanceledException : CancelVPS was called");
+                }
+                else
+                {
+                    SturfeeDebug.LogError($"{e.Message}" + "\n" + e.StackTrace);
+                    SturfeeEventManager.Instance.LocalizationFail(ErrorMessages.SessionNotReady);
+                }
+
+                Status = XRSessionStatus.NotCreated;
+            }
+            finally
+            {
+                _preScanCTS = null;
+            }
+
+            //await PrepareForScan(scanType, scanConfig);
         }
 
         public void PerformLocalization(LocalizationMode localizationMode = LocalizationMode.WebServer)
@@ -162,13 +193,13 @@ namespace SturfeeVPS.Core
             if (Status <= XRSessionStatus.Ready)
             {
                 _preScanCTS?.Cancel();
-                LocalizationManager.DisconnectScanner();
             }
             else if (Status == XRSessionStatus.Scanning || Status == XRSessionStatus.Loading)
             {
                 Status = XRSessionStatus.Ready;
-                LocalizationManager.StopScan();
             }
+
+            LocalizationManager.StopScan();
         }
 
         public void DisableVPS()
@@ -177,8 +208,10 @@ namespace SturfeeVPS.Core
             Status = XRSessionStatus.Ready;
         }
 
-        private async Task WaitForGps(CancellationToken ct = default)
+        internal async Task WaitForGps(CancellationToken ct = default)
         {
+            SturfeeDebug.Log(" Waiting for GPS");
+
             float start = Time.time;
             var gpsProvider = GpsProvider;
 
@@ -208,13 +241,19 @@ namespace SturfeeVPS.Core
                 {
                     throw new SessionException(ErrorMessages.GpsProviderTimeout);
                 }
+                
+                SturfeeDebug.Log(" Waiting 1 second for GPS...");
 
-                await Task.Yield();
+                await Task.Delay(1000);
             }
+
+            SturfeeDebug.Log($" GPS ready : {gpsProvider.GetCurrentLocation().ToFormattedString()}");
         }
 
-        private async Task WaitForPose(CancellationToken ct = default)
+        internal async Task WaitForPose(CancellationToken ct = default)
         {
+            SturfeeDebug.Log(" Waiting for IMU/Pose");
+
             float start = Time.time;
 
             if (PoseProvider.GetProviderStatus() == ProviderStatus.Ready)
@@ -244,10 +283,14 @@ namespace SturfeeVPS.Core
 
                 await Task.Yield();
             }
+
+            SturfeeDebug.Log($" Pose/IMU ready");
         }
 
-        private async Task WaitForVideo(CancellationToken ct = default)
+        internal async Task WaitForVideo(CancellationToken ct = default)
         {
+            SturfeeDebug.Log(" Waiting for Video");
+
             float start = Time.time;
 
             if (VideoProvider.GetProviderStatus() == ProviderStatus.Ready)
@@ -277,6 +320,8 @@ namespace SturfeeVPS.Core
 
                 await Task.Yield();
             }
+
+            SturfeeDebug.Log($" Video ready");
         }
 
         private async Task CheckConnection()
@@ -300,81 +345,67 @@ namespace SturfeeVPS.Core
             {
                 throw new SessionException(ErrorMessages.TokenNotAvailable);
             }
-
-            if (!_tokenValidated)
+            
+            if (location == null)
             {
-                if (location == null)
-                {
-                    location = GpsProvider.GetCurrentLocation();
-                }
-                try
-                {
-                    await WebServices.ValidateToken(location, _token);
-                    _tokenValidated = true;
-                }
-                catch(HttpException e)
-                {
-                    switch (e.ErrorCode)
-                    {                        
-                        case 501:
-                            throw new SessionException(ErrorMessages.NoCoverageArea);
-                        case 400:
-                            throw new SessionException(ErrorMessages.Error400);
-                        case 403:
-                            throw new SessionException(ErrorMessages.NotAuthorizedToken);
-                        case 500:
-                            throw new SessionException(ErrorMessages.Error500);
-                        default:
-                            throw new SessionException(ErrorMessages.HttpErrorGeneric);
-                    }
-                }
+                location = GpsProvider.GetCurrentLocation();
             }
-        }
-
-        public async Task CheckCoverage(GeoLocation location = null)
-        {
-            if (!_coverageChecked)
+            try
             {
-                if (location == null)
-                {
-                    location = GpsProvider.GetCurrentLocation();
-                }
-
-                try
-                {
-                    await WebServices.CheckCoverage(location, _token);
-                    _coverageChecked = true;
-                }
-                catch(HttpException e)
-                {
-                    throw e.ErrorCode switch
-                    {
-                        501 => new SessionException(ErrorMessages.NoCoverageArea),
-                        400 => new SessionException(ErrorMessages.Error400),
-                        403 => new SessionException(ErrorMessages.Error403),
-                        500 => new SessionException(ErrorMessages.Error500),
-                        _ => new SessionException(ErrorMessages.HttpErrorGeneric),
-                    };
+                await WebServices.ValidateToken(location, _token);
+            }
+            catch(HttpException e)
+            {
+                switch (e.ErrorCode)
+                {                        
+                    case 501:
+                        throw new SessionException(ErrorMessages.NoCoverageArea);
+                    case 400:
+                        throw new SessionException(ErrorMessages.Error400);
+                    case 403:
+                        throw new SessionException(ErrorMessages.NotAuthorizedToken);
+                    case 500:
+                        throw new SessionException(ErrorMessages.Error500);
+                    default:
+                        throw new SessionException(ErrorMessages.HttpErrorGeneric);
                 }
             }            
         }
 
+        public async Task CheckCoverage(GeoLocation location = null)
+        {
+            if (location == null)
+            {
+                location = GpsProvider.GetCurrentLocation();
+            }
+
+            try
+            {
+                await WebServices.CheckCoverage(location, _token);
+            }
+            catch(HttpException e)
+            {
+                throw e.ErrorCode switch
+                {
+                    501 => new SessionException(ErrorMessages.NoCoverageArea),
+                    400 => new SessionException(ErrorMessages.Error400),
+                    403 => new SessionException(ErrorMessages.Error403),
+                    500 => new SessionException(ErrorMessages.Error500),
+                    _ => new SessionException(ErrorMessages.HttpErrorGeneric),
+                };
+            }                      
+        }
+
         public async Task LoadTiles(GeoLocation location = null, CancellationToken ct = default)
         {
-            if (!_tilesLoaded)
-            {                
-                if(location == null)
-                {
-                    location = GpsProvider.GetCurrentLocation();
-                }                
-                var tileService = new TileService();
-                await tileService.LoadTiles(location, (int)Config.TileSize, _token, ct);
-                CenterRef = tileService.CenterReference;
-                PositioningUtils.Init(tileService.CenterReference);
-
-                _tilesLoaded = true;
-                SturfeeEventManager.Instance.TilesLoaded();
+            if (location == null)
+            {
+                location = GpsProvider.GetCurrentLocation();
             }
+            var tileService = new TileService();
+            await tileService.LoadTiles(location, (int)Config.TileSize, _token, ct);            
+
+            SturfeeEventManager.Instance.TilesLoaded();
         }
 
         public float GetTerrainElevation(GeoLocation location = null)
@@ -421,63 +452,37 @@ namespace SturfeeVPS.Core
             return _sessionGO;
         }
 
-        private async Task PrepareForScan(ScanType scanType, ScanConfig scanConfig = null)
+        internal GeoLocation GetFallbackLocation()
         {
-            _preScanCTS = new CancellationTokenSource();
-            var cancellationToken = _preScanCTS.Token;
-            
+            GeoLocation location = new GeoLocation();
+#if UNITY_EDITOR            
+            location = EditorUtils.EditorFallbackLocation;
+#else
+            location = new GeoLocation(Input.location.lastData);
+#endif
+            return location;
+        }
+
+        private async Task<GeoLocation> GetLocation(CancellationToken ct)
+        {
+                           
+            GeoLocation location = new GeoLocation();
             try
             {
-                // Providers
-                var gpsPrescan = GpsProvider.PrepareForScan(cancellationToken);
-                var posePrescan = PoseProvider.PrepareForScan(cancellationToken);
-                var videoPrescan = VideoProvider.PrepareForScan(cancellationToken);
-
-                // Session
-                var sessionVerification = VerifySession(cancellationToken).CancelOnFaulted(_preScanCTS);
-
-                // Scanner socket connection                
-                var scannerConnection = CreateScannerAndOpenSocketConnection(scanType, scanConfig).CancelOnFaulted(_preScanCTS);
-
-                await sessionVerification;
-                SturfeeDebug.Log("Session verification complete");
-                await gpsPrescan;
-                SturfeeDebug.Log("GPS pre-scan complete");
-                await posePrescan;
-                SturfeeDebug.Log("Pose pre-scan complete");
-                await videoPrescan;
-                SturfeeDebug.Log("Video pre-scan complete");
-                await scannerConnection;
-                SturfeeDebug.Log("Socket connection verified");
-
-                SturfeeEventManager.Instance.ReadyForScan();           
+                await WaitForGps(ct);
+                location = GpsProvider.GetCurrentLocation();
             }
-            catch (Exception e)
+            catch (IdException e)
             {
-                if (e is SessionException se)
+                // IF GPSProvider timed out
+                if (e.Id == ErrorMessages.GpsProviderTimeout.Item1)
                 {
-                    SturfeeEventManager.Instance.LocalizationFail(se.IdError);
+                    location = GetFallbackLocation();
+                    SturfeeDebug.Log($"GPS Provider timed out. Using GPS {location.ToFormattedString()} from Unity's location API");
                 }
-                else if (e is IdException ie)
-                {
-                    SturfeeEventManager.Instance.LocalizationFail(ie.IdError);                    
-                }
-                else if (e is OperationCanceledException)
-                {
-                    SturfeeDebug.Log("OperationCanceledException : CancelVPS was called");
-                }
-                else
-                {
-                    SturfeeDebug.LogError($"{e.Message}" + "\n" + e.StackTrace);
-                    SturfeeEventManager.Instance.LocalizationFail(ErrorMessages.SessionNotReady);
-                }
+            }
 
-                Status = XRSessionStatus.NotCreated;
-            }
-            finally
-            {
-                _preScanCTS = null;
-            }
+            return location;
         }
 
         private async Task VerifySession(CancellationToken ct)
@@ -486,38 +491,19 @@ namespace SturfeeVPS.Core
             {
                 while (Status == XRSessionStatus.Initializing)
                 {
-                    SturfeeDebug.Log(" Waiting for session to be ready...");
+                    SturfeeDebug.Log(" Waiting 1 second for session to be ready...");
                     ct.ThrowIfCancellationRequested();
-                    await Task.Yield();
+                    await Task.Delay(1000);
                 }
 
                 if (Status == XRSessionStatus.NotCreated)
-                {                    
+                {
                     SturfeeDebug.Log(" Session is not created or session creation failed. " +
-                        "Attempting to create a session again");
+                        "Attempting to create session again");
 
                     await CreateSession(ct);
                 }
             }
-        }
-
-        private async Task CreateScannerAndOpenSocketConnection(ScanType scanType, ScanConfig scanConfig)
-        {
-            GeoLocation location;   // This location is used during socket connection
-            if (GpsProvider.GetProviderStatus() == ProviderStatus.Ready)
-            {
-                location = GpsProvider.GetCurrentLocation();
-            }
-            else
-            {
-#if UNITY_EDITOR
-                location = new GeoLocation { Latitude = 37.332093d, Longitude = -121.890137d };
-#else
-                location = new GeoLocation(Input.location.lastData);
-#endif
-            }
-
-            await LocalizationManager.ConnectScanner(scanType, scanConfig, location, _token, Config.Locale);
         }
 
         private void LoadSessionConfig(XRSessionConfig config)

@@ -1,12 +1,15 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace SturfeeVPS.Core
 {
     internal class SatelliteScanner : PanoramicMultiframeScanner
     {
-        public SatelliteScanner(ScanConfig scanConfig = null) : base(scanConfig) 
+        public async override Task Initialize(ScanConfig scanConfig = null, CancellationToken cancellationToken = default)
         {
-            Debug.Log(" Creating satellite Scanner");
+            SturfeeDebug.Log(" Initializing Satellite Scanner");
 
             // set scan properties
             ScanProperties.YawAngle = ScanProperties.Defaults.Satellite.YawAngle;
@@ -20,6 +23,24 @@ namespace SturfeeVPS.Core
 
             ScanType = ScanType.Satellite;
             OffsetType = OffsetType.Quaternion;
+
+            await base.Initialize(scanConfig, cancellationToken);
+        }
+
+        public override async Task Connect(string accessToken, string language = "en-US")
+        {
+            await base.Connect(accessToken, language);
+
+            try
+            {
+                var location = XRSessionManager.GetSession().GpsProvider.GetCurrentLocation();
+                await localizationService.Connect(location.Latitude, location.Longitude);
+            }
+            catch (Exception e)
+            {
+                SturfeeDebug.LogError(e.Message);
+                throw new SessionException(ErrorMessages.SocketConnectionFail);
+            }
         }
     }
 }

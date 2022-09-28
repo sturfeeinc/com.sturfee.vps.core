@@ -30,6 +30,9 @@ namespace SturfeeVPS.Core
 
             if (session.Status != XRSessionStatus.Localized)
             {
+                if (session.GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
+                    return XRSessionManager.GetSession().GetFallbackLocation();
+
                 return session.GpsProvider.GetCurrentLocation();
             }
 
@@ -39,7 +42,7 @@ namespace SturfeeVPS.Core
             GameObject child = new GameObject("child");
             child.transform.parent = parent.transform;
             child.transform.localPosition =
-                session.PoseProvider.GetPosition() - _trackingOrigin;
+                session.PoseProvider.GetPosition() - _positionOnScanStart;
 
             Vector3 vpsWorld = PositioningUtils.GeoToWorldPosition(LocationCorrection);
             Vector3 finalWorldPos = vpsWorld + child.transform.position;
@@ -61,6 +64,7 @@ namespace SturfeeVPS.Core
 
                 return yaw * sensor * pitch;
             }
+
             Quaternion offset = Quaternion.Euler(EulerOrientationCorrection);
             return offset * sensor ;            
         }
@@ -71,19 +75,22 @@ namespace SturfeeVPS.Core
             Vector3 relative;
             if (XRSessionManager.GetSession().Status != XRSessionStatus.Localized)
             {
-                location = new GeoLocation
+                if (XRSessionManager.GetSession().GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
                 {
-                    Latitude = XRSessionManager.GetSession().GpsProvider.GetCurrentLocation().Latitude,
-                    Longitude = XRSessionManager.GetSession().GpsProvider.GetCurrentLocation().Longitude,
-                    Altitude = TerrainElevation + CameraHeight
-                };
+                    location = XRSessionManager.GetSession().GetFallbackLocation();
+                }
+                else
+                {
+                    location = XRSessionManager.GetSession().GpsProvider.GetCurrentLocation();
+                }
+                location.Altitude = TerrainElevation + CameraHeight;                
 
                 relative = XRSessionManager.GetSession().PoseProvider.GetPosition();
             }
             else
             {
                 location = LocationCorrection;
-                relative = Rotate(_trackingOrigin);
+                relative = Rotate(_positionOnScanStart);
             }
 
             var absolute = PositioningUtils.GeoToWorldPosition(location);

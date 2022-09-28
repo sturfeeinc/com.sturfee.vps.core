@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using SturfeeVPS.Core.Proto;
@@ -17,7 +18,7 @@ namespace SturfeeVPS.Core
         // Request
         private int _requestNum = 0;
         private int _requestId = 0;
-        private Vector3 _trackingOrigin;
+        private Vector3 _positionOnScanStart;
 
         // Response
         private string _trackingId;
@@ -25,6 +26,7 @@ namespace SturfeeVPS.Core
         private IScanner _scanner;
         private OffsetType _offsetType = OffsetType.Quaternion;
         private bool _accumulateOffsets = false;
+
         public LocalizationManager(bool accumulateOffsets = false)
         {
             YawOrientationCorrection = Quaternion.identity;
@@ -35,10 +37,11 @@ namespace SturfeeVPS.Core
             _accumulateOffsets = accumulateOffsets;
         }
 
-        public async Task ConnectScanner(ScanType scanType, ScanConfig scanConfig, GeoLocation location, string accessToken, string language = "en-US")
+        public async Task InitializeScan(ScanType scanType, ScanConfig scanConfig, string accessToken, string language = "en-US", CancellationToken cancellationToken = default)
         {
             if(_scanner != null)
             {
+                SturfeeDebug.Log($" Previous scanner ({_scanner.ScanType}) still active. ");
                 _scanner.Disconnect();
                 _scanner = null;
             }
@@ -46,22 +49,25 @@ namespace SturfeeVPS.Core
             switch (scanType)
             {
                 case ScanType.Satellite:
-                    _scanner = new SatelliteScanner(scanConfig);
+                    _scanner = new SatelliteScanner();
                     break;
                 case ScanType.HD:
-                    _scanner = new HDScanner(scanConfig);
+                    _scanner = new HDScanner();
                     break;
             }
 
             try
             {
-                await _scanner.Connect(location, accessToken, language);
+                await _scanner.Initialize(scanConfig, cancellationToken);  
+                await _scanner.Connect(accessToken, language);
+
                 _scanner.OnLocalizationResponse += OnLocalizationResonse;
             }
             catch (Exception ex)
             {
                 SturfeeDebug.LogError(ex.Message);
-                throw new SessionException(ErrorMessages.SocketConnectionFail);
+                _scanner = null;
+                throw;
             }
         }
 
@@ -80,8 +86,8 @@ namespace SturfeeVPS.Core
             }
 
             _requestNum++;
-            _trackingOrigin = XRSessionManager.GetSession().PoseProvider.GetPosition();
             _requestId = (_requestNum * 10) + (int)OperationMessages.Alignment;
+            _positionOnScanStart = XRSessionManager.GetSession().PoseProvider.GetPosition();
 
             _scanner.StartScan(_requestId);
 
@@ -90,17 +96,30 @@ namespace SturfeeVPS.Core
 
         public void StopScan()
         {
-            _scanner?.StopScan();
+            if (_scanner == null)
+            {
+                SturfeeDebug.LogWarning($"Cannot stop scan. No scanner running");
+                return;
+            }
+
+            if(_scanner.IsScanning)
+            {
+                SturfeeDebug.Log($" Stopping {_scanner.ScanType} scan but keeping socket connection alive");
+                _scanner.StopScan();
+            }
+            else
+            {
+                SturfeeDebug.Log($" Disconnecting {_scanner.ScanType} scanner's socket connection");
+                _scanner.Disconnect();
+                _scanner = null;
+            }
         }
 
-        public void DisconnectScanner()
-        {
-            _scanner?.Disconnect();
-        }
-        
         public void DisableVPS()
         {
-            DisconnectScanner();
+            _scanner?.Disconnect();
+            _scanner = null;
+            
             ResetOffsets();
         }
 

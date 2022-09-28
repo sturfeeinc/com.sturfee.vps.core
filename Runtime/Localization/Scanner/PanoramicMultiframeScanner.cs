@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
@@ -15,42 +16,59 @@ namespace SturfeeVPS.Core
     {
         protected string serviceUrl;
 
-        public PanoramicMultiframeScanner(ScanConfig scanConfig = null) : base(scanConfig) { }
-   
-
-        public async override Task Connect(GeoLocation location, string accessToken, string language = "en-US")
+        protected XRSession xrSession;
+        protected bool initialized;
+        
+        public async override Task Initialize(ScanConfig scanConfig= null, CancellationToken cancellationToken = default)
         {
+            xrSession = XRSessionManager.GetSession();
+            if(xrSession == null)
+            {
+                throw new Exception($"{ScanType} Scanner : ERROR => cannot initialize. XRSession is NULL");
+            }
+
+            List<Task> providerTasks = new List<Task>() { 
+                xrSession.WaitForGps(cancellationToken),
+                xrSession.WaitForPose(cancellationToken),
+                xrSession.WaitForVideo(cancellationToken) 
+            };
+            await Task.WhenAll(providerTasks);
+            SturfeeDebug.Log("All providers ready");
+
+            await xrSession.CheckCoverage();
+
+            List<Task> preScanTasks = new List<Task>() { 
+                xrSession.GpsProvider.PrepareForScan(cancellationToken), 
+                xrSession.PoseProvider.PrepareForScan(cancellationToken), 
+                xrSession.VideoProvider.PrepareForScan(cancellationToken) 
+            };
+            await Task.WhenAll(preScanTasks);
+            SturfeeDebug.Log("All providers ready for scan");
+
+            initialized = true;
+        }
+        
+        public async override Task Connect(string accessToken, string language = "en-US")
+        {
+            if (!initialized)
+            {
+                throw new Exception($"{ScanType} Scanner not initialized");
+            }
+
             SturfeeDebug.Log($" Establishing socket connection for {ScanType} scanner");
             
-            await base.Connect(location, accessToken, language);
+            await base.Connect(accessToken, language);
 
             localizationService = new LocalizationService(serviceUrl, accessToken, language);
+        }
 
-            try
-            {
-                await localizationService.Connect(location.Latitude, location.Longitude);
-            }
-            catch (Exception e)
-            {
-                SturfeeDebug.LogError(e.Message);
-                throw new SessionException(ErrorMessages.SocketConnectionFail);
-            }
-        }
-        public override void Disconnect()
-        {
-            base.Disconnect();
-        }
         public async override void StartScan(int scanId)
         {
             base.StartScan(scanId);
-            SturfeeDebug.Log(" Scan started with Id : " + scanId);
 
             await CaptureAndSendAsync(scanId);
         }
-        public override void StopScan()
-        {
-            base.StopScan();
-        }
+
         protected virtual async Task CaptureAndSendAsync(int requestId)
         {
             float startYaw = XRSessionManager.GetSession().GetXRCameraOrientation().QuaternionToEuler(RotSeq.zyx).z;
@@ -59,7 +77,7 @@ namespace SturfeeVPS.Core
             float currentTargetYaw = 0;
 
             // Wait till all the frames are captured 
-            while (frameOrder < numOfFrames && XRSessionManager.GetSession().Status == XRSessionStatus.Scanning)
+            while (frameOrder < numOfFrames && IsScanning)
             {
                 float currentYaw = XRSessionManager.GetSession().GetXRCameraOrientation().QuaternionToEuler(RotSeq.zyx).z;
                 float yawDiff = GetYawDiff(currentYaw, startYaw);
@@ -96,6 +114,7 @@ namespace SturfeeVPS.Core
                 SturfeeEventManager.Instance.LocalizationLoading();
             }
         }
+        
         protected virtual Request CaptureRequest(uint requestId, OperationMessages operationMessage, uint numOfFrames, uint frameOrder, string trackingId)
         {
             GeoLocation location = XRSessionManager.GetSession().GetXRCameraLocation();
@@ -161,6 +180,7 @@ namespace SturfeeVPS.Core
 
             return request;
         }
+        
         protected virtual void SendRequest(Request request)
         {
             byte[] buffer = request.ToByteArray();
@@ -186,42 +206,13 @@ namespace SturfeeVPS.Core
                 }
             );
 
-            LocalizationRequest localizationRequest = new LocalizationRequest
-            {
-                requestId = (int)request.RequestId,
-                frame = new Multiframe
-                {
-                    order = (int)request.FrameOrder,
-                    count = (int)request.TotalNumOfFrames
-                },
-                externalParameters = new ExternalParameters
-                {
-                    latitude = request.ExternalParameters.Position.Lat,
-                    longitude = request.ExternalParameters.Position.Lon,
-                    height = request.ExternalParameters.Position.Height,
-                    quaternion = new Quaternion(
-                        (float)request.ExternalParameters.Quaternion.X,
-                        (float)request.ExternalParameters.Quaternion.Y,
-                        (float)request.ExternalParameters.Quaternion.Z,
-                        (float)request.ExternalParameters.Quaternion.W
-                    )
-                },
-                internalParameters = new InternalParameters
-                {
-                    fov = request.InternalParameters.Fov,
-                    sceneWidth = (int)request.InternalParameters.SceneWidth,
-                    sceneHeight = (int)request.InternalParameters.SceneHeight,
-                    isPortrait = XRSessionManager.GetSession().VideoProvider.IsPortrait() ? 1 : 0,
-                    projectionMatrix = XRSessionManager.GetSession().VideoProvider.GetProjectionMatrix()
-                },
-                siteId = request.SiteId
-            };
-
+            LocalizationRequest localizationRequest = RequestToLocalizationRequest(request);
 
             SturfeeEventManager.Instance.FrameCaptured((int)request.FrameOrder + 1, localizationRequest, request.SourceImage.ToByteArray());
 
             SturfeeDebug.Log(JsonUtility.ToJson(localizationRequest), false);
         }
+        
         private float GetYawDiff(float yaw1, float yaw2)
         {
             float yawDiff = (yaw1 - yaw2);
@@ -244,6 +235,7 @@ namespace SturfeeVPS.Core
 
             return -yawDiff;    // clockwise is -ve
         }
+        
         private bool HasRequestError()
         {
             var request = XRSessionManager.GetSession().GetXRCameraOrientation().QuaternionToEuler(RotSeq.zyx);
@@ -275,6 +267,42 @@ namespace SturfeeVPS.Core
             }
 
             return false;
+        }
+
+        private LocalizationRequest RequestToLocalizationRequest(Request request)
+        {
+            LocalizationRequest localizationRequest = new LocalizationRequest
+            {
+                requestId = (int)request.RequestId,
+                frame = new Multiframe
+                {
+                    order = (int)request.FrameOrder,
+                    count = (int)request.TotalNumOfFrames
+                },
+                externalParameters = new ExternalParameters
+                {
+                    latitude = request.ExternalParameters.Position.Lat,
+                    longitude = request.ExternalParameters.Position.Lon,
+                    height = request.ExternalParameters.Position.Height,
+                    quaternion = new Quaternion(
+                        (float)request.ExternalParameters.Quaternion.X,
+                        (float)request.ExternalParameters.Quaternion.Y,
+                        (float)request.ExternalParameters.Quaternion.Z,
+                        (float)request.ExternalParameters.Quaternion.W
+                    )
+                },
+                internalParameters = new InternalParameters
+                {
+                    fov = request.InternalParameters.Fov,
+                    sceneWidth = (int)request.InternalParameters.SceneWidth,
+                    sceneHeight = (int)request.InternalParameters.SceneHeight,
+                    isPortrait = XRSessionManager.GetSession().VideoProvider.IsPortrait() ? 1 : 0,
+                    projectionMatrix = XRSessionManager.GetSession().VideoProvider.GetProjectionMatrix()
+                },
+                siteId = request.SiteId
+            };
+
+            return localizationRequest;
         }
     }
 }

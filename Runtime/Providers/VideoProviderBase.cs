@@ -86,6 +86,7 @@ namespace SturfeeVPS.Core
         /// </summary>
         public async virtual Task PrepareForScan(CancellationToken token)
         {
+            SturfeeDebug.Log($" Preparing VideoProvider for scan");
         }
 
         public IEnumerator PrepareForScan()

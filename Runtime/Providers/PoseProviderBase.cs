@@ -51,7 +51,7 @@ namespace SturfeeVPS.Core
         /// </summary>
         public async virtual Task PrepareForScan(CancellationToken token)
         {
-
+            SturfeeDebug.Log($" Preparing PoseProvider for scan");
         }
 
         /// <summary>
