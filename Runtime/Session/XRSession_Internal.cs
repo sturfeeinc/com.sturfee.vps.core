@@ -345,11 +345,19 @@ namespace SturfeeVPS.Core
             {
                 throw new SessionException(ErrorMessages.TokenNotAvailable);
             }
-            
+
             if (location == null)
             {
-                location = GpsProvider.GetCurrentLocation();
+                if (GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
+                {
+                    location = GetFallbackLocation();
+                }
+                else
+                {
+                    location = GpsProvider.GetCurrentLocation();
+                }
             }
+
             try
             {
                 await WebServices.ValidateToken(location, _token);
@@ -376,7 +384,14 @@ namespace SturfeeVPS.Core
         {
             if (location == null)
             {
-                location = GpsProvider.GetCurrentLocation();
+                if (GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
+                {
+                    location = GetFallbackLocation();
+                }
+                else
+                {
+                    location = GpsProvider.GetCurrentLocation();
+                }
             }
 
             try
@@ -400,8 +415,16 @@ namespace SturfeeVPS.Core
         {
             if (location == null)
             {
-                location = GpsProvider.GetCurrentLocation();
+                if (GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
+                {
+                    location = GetFallbackLocation();
+                }
+                else
+                {
+                    location = GpsProvider.GetCurrentLocation();
+                }
             }
+
             var tileService = new TileService();
             await tileService.LoadTiles(location, (int)Config.TileSize, _token, ct);            
 
@@ -411,8 +434,15 @@ namespace SturfeeVPS.Core
         public float GetTerrainElevation(GeoLocation location = null)
         {
             if (location == null)
-            { 
-                location = XRSessionManager.GetSession().GpsProvider.GetCurrentLocation();
+            {
+                if (GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
+                {
+                    location = GetFallbackLocation();
+                }
+                else
+                {
+                    location = GpsProvider.GetCurrentLocation();
+                }
             }
             RaycastHit hit;
             
