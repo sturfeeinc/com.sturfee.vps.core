@@ -450,7 +450,7 @@ namespace SturfeeVPS.Core
             Vector3 unityPos = new Vector3(worldPos.x, worldPos.z + 1000, worldPos.y);
 
             Ray ray = new Ray(unityPos, Vector3.down);
-            //Debug.DrawRay(ray.origin, ray.direction * 10000, Color.green, 2000);
+            //Debug.DrawRay(ray.origin, ray.direction * 10000, Color.red, 2000);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, LayerMask.GetMask(SturfeeLayers.Terrain)))
             {
                 float elevation = hit.point.y;
@@ -458,7 +458,7 @@ namespace SturfeeVPS.Core
                 return elevation;
             }
 
-            return (float)location.Altitude;
+            return 0;
         }        
 
         internal Coroutine StartCoroutine(IEnumerator enumerator)
