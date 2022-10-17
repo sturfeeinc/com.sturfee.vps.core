@@ -9,5 +9,6 @@ namespace SturfeeVPS.Core
         public GeoLocation location;
         public Quaternion yawOrientationCorrection;
         public Quaternion pitchOrientationCorrection;
+        public Vector3 eulerOffset;
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SturfeeVPS.Core
 {
-    internal class LocalizationService
+    public class LocalizationService
     {
         public static readonly string STATUS_SUCCESS = "success";
         public static readonly string STATUS_OK = "ok";

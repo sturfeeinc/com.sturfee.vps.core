@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 namespace SturfeeVPS.Core
 {
 
-    internal delegate void LocalizationResponseDelegate(ResponseMessage responseMessage, OffsetType offsetType);
-    internal interface IScanner
+    public delegate void LocalizationResponseDelegate(ResponseMessage responseMessage, OffsetType offsetType);
+    public interface IScanner
     {
         ScanType ScanType { get; }
         OffsetType OffsetType { get; }
@@ -21,20 +21,25 @@ namespace SturfeeVPS.Core
         void StartScan(int scanId);
         void StopScan();
 
+        event SturfeeEvents.OnFrameCaptured OnFrameCaptured;
+        event SturfeeEvents.LocalizationLoadingAction OnLocalizationLoading;
         event LocalizationResponseDelegate OnLocalizationResponse;
     }
 
-    internal class ScannerBase : IScanner
+    public class ScannerBase : IScanner
     {
-        public ScanType ScanType { get; set; }
-        public OffsetType OffsetType { get; set; }
-        public bool IsScanning { get; set; }
+        public ScanType ScanType { get; protected set; }
+        public OffsetType OffsetType { get; protected set; }
+        public bool IsScanning { get; protected set; }
 
         protected int scanId;
         protected ScanConfig scanConfig;
         protected LocalizationService localizationService;
 
         public event LocalizationResponseDelegate OnLocalizationResponse;
+        public event SturfeeEvents.OnFrameCaptured OnFrameCaptured;
+        public event SturfeeEvents.LocalizationLoadingAction OnLocalizationLoading;
+
         public async virtual Task Initialize(ScanConfig scanConfig = null, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();

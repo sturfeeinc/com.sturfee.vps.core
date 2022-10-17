@@ -9,7 +9,11 @@ namespace SturfeeVPS.Core
 {
     internal class XRSession_Internal
     {
+#if UNITY_EDITOR
+        public readonly int SESSION_TIMEOUT = 3;
+#else
         public readonly int SESSION_TIMEOUT = 10;
+#endif
 
         public XRSessionStatus Status { internal set; get; }
 
@@ -27,13 +31,26 @@ namespace SturfeeVPS.Core
         private IPoseProvider _poseProvider;
         private IVideoProvider _videProvider;
 
+        private bool _tokenValidated = false;
+        private bool _coverageChecked = false;
+        private bool _tilesLoaded = false;
+
         public IGpsProvider GpsProvider
         {
+            set
+            {
+                if(_gpsProvider != null)
+                {
+                    _gpsProvider.Destroy();
+                }
+                SturfeeDebug.Log($"Replacing Session's GpsProvider from {_gpsProvider.GetType().Name} to {value.GetType().Name}");
+                _gpsProvider = value;
+            }
             get
             {
                 if(_gpsProvider == null)
                 {
-                    _gpsProvider = new LocationProvider(Config.GpsProvider);
+                    _gpsProvider = Config.GpsProvider;
                     _gpsProvider.Initialize();
                 }
                 return _gpsProvider; 
@@ -42,6 +59,16 @@ namespace SturfeeVPS.Core
 
         public IPoseProvider PoseProvider
         {
+            set
+            {
+                if (_poseProvider != null)
+                {
+                    _poseProvider.Destroy();
+                }
+                SturfeeDebug.Log($"Replacing Session's PoseProvider from {_poseProvider?.GetType().Name} to {value.GetType().Name}");
+
+                _poseProvider = value;
+            }
             get
             {
                 if (_poseProvider == null)
@@ -55,6 +82,16 @@ namespace SturfeeVPS.Core
 
         public IVideoProvider VideoProvider
         {
+            set
+            {
+                if (_videProvider != null)
+                {
+                    _videProvider.Destroy();
+                }
+                SturfeeDebug.Log($"Replacing Session's VideoProvider from {_videProvider?.GetType().Name} to {value.GetType().Name}");
+
+                _videProvider = value;
+            }
             get
             {
                 if (_videProvider == null)
@@ -94,9 +131,9 @@ namespace SturfeeVPS.Core
                 await ValidateToken(location);
                 await CheckCoverage(location);
                 await LoadTiles(location, ct);
-                await WaitForVideo(ct);
-                await WaitForPose(ct);
 
+                await Task.WhenAll(WaitForVideo(ct), WaitForPose(ct));
+                
                 SturfeeDebug.Log("Session ready");
                 SturfeeEventManager.Instance.SessionIsReady();                
             }
@@ -141,14 +178,14 @@ namespace SturfeeVPS.Core
 
         public Vector3 GetEulerOffset => LocalizationManager.EulerOrientationCorrection;
 
-        public async void EnableVPS(ScanType scanType, ScanConfig scanConfig = null)
+        public async void EnableVPS(IScanner scanner, ScanConfig scanConfig = null)
         {
             _preScanCTS = new CancellationTokenSource();
             var cancellationToken = _preScanCTS.Token;
 
             try
             {
-                await LocalizationManager.InitializeScan(scanType, scanConfig, _token, Config.Locale, cancellationToken);
+                await LocalizationManager.InitializeScan(scanner, scanConfig, _token, Config.Locale, cancellationToken);
                 await VerifySession(cancellationToken);
 
                 SturfeeEventManager.Instance.ReadyForScan();
@@ -341,6 +378,9 @@ namespace SturfeeVPS.Core
 
         public async Task ValidateToken(GeoLocation location = null)
         {
+            if (_tokenValidated)
+                return;
+
             if (string.IsNullOrEmpty(_token))
             {
                 throw new SessionException(ErrorMessages.TokenNotAvailable);
@@ -348,19 +388,14 @@ namespace SturfeeVPS.Core
 
             if (location == null)
             {
-                if (GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
-                {
-                    location = GetFallbackLocation();
-                }
-                else
-                {
-                    location = GpsProvider.GetCurrentLocation();
-                }
+                location = (GpsProvider.GetProviderStatus() == ProviderStatus.Ready ? GpsProvider.GetCurrentLocation() : GetFallbackLocation());
             }
 
             try
             {
                 await WebServices.ValidateToken(location, _token);
+
+                _tokenValidated = true;
             }
             catch(HttpException e)
             {
@@ -382,6 +417,9 @@ namespace SturfeeVPS.Core
 
         public async Task CheckCoverage(GeoLocation location = null)
         {
+            if (_coverageChecked)
+                return;
+
             if (location == null)
             {
                 if (GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
@@ -397,6 +435,7 @@ namespace SturfeeVPS.Core
             try
             {
                 await WebServices.CheckCoverage(location, _token);
+                _coverageChecked = true;
             }
             catch(HttpException e)
             {
@@ -413,6 +452,9 @@ namespace SturfeeVPS.Core
 
         public async Task LoadTiles(GeoLocation location = null, CancellationToken ct = default)
         {
+            if (_tilesLoaded)
+                return;
+
             if (location == null)
             {
                 if (GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
@@ -427,7 +469,7 @@ namespace SturfeeVPS.Core
 
             var tileService = new TileService();
             await tileService.LoadTiles(location, (int)Config.TileSize, _token, ct);            
-
+            _tilesLoaded = true;
             SturfeeEventManager.Instance.TilesLoaded();
         }
 
@@ -484,7 +526,7 @@ namespace SturfeeVPS.Core
         internal GeoLocation GetFallbackLocation()
         {
             GeoLocation location = new GeoLocation();
-#if UNITY_EDITOR            
+#if UNITY_EDITOR
             location = EditorUtils.EditorFallbackLocation;
 #else
             location = new GeoLocation(Input.location.lastData);

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace SturfeeVPS.Core
 {
-    internal class HDScanner : PanoramicMultiframeScanner
+    public class HDScanner : PanoramicMultiframeScanner
     {
         public async override Task Initialize(ScanConfig scanConfig = null, CancellationToken cancellationToken = default)
         {

@@ -37,7 +37,7 @@ namespace SturfeeVPS.Core
             _accumulateOffsets = accumulateOffsets;
         }
 
-        public async Task InitializeScan(ScanType scanType, ScanConfig scanConfig, string accessToken, string language = "en-US", CancellationToken cancellationToken = default)
+        public async Task InitializeScan(IScanner scanner, ScanConfig scanConfig, string accessToken, string language = "en-US", CancellationToken cancellationToken = default)
         {
             if(_scanner != null)
             {
@@ -46,18 +46,23 @@ namespace SturfeeVPS.Core
                 _scanner = null;
             }
 
-            switch (scanType)
-            {
-                case ScanType.Satellite:
-                    _scanner = new SatelliteScanner();
-                    break;
-                case ScanType.HD:
-                    _scanner = new HDScanner();
-                    break;
-            }
+            _scanner = scanner;
 
             try
             {
+
+                _scanner.OnFrameCaptured += (frameNum, request, frame) =>
+                {
+                    SturfeeDebug.Log($"{frameNum} captured");
+                    SturfeeEventManager.Instance.FrameCaptured(frameNum, request, frame);
+                };
+
+                _scanner.OnLocalizationLoading += () =>
+                {
+                    SturfeeDebug.Log($"Loading...");
+                    SturfeeEventManager.Instance.LocalizationLoading();
+                };
+
                 await _scanner.Initialize(scanConfig, cancellationToken);  
                 await _scanner.Connect(accessToken, language);
 
@@ -110,7 +115,7 @@ namespace SturfeeVPS.Core
             else
             {
                 SturfeeDebug.Log($" Disconnecting {_scanner.ScanType} scanner's socket connection");
-                _scanner.Disconnect();
+                _scanner.Disconnect();                
                 _scanner = null;
             }
         }

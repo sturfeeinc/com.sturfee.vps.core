@@ -25,17 +25,17 @@ namespace SturfeeVPS.Core
         /// <summary>
         /// GpsProvider used to create this session
         /// </summary>
-        public IGpsProvider GpsProvider => _sessionInternal.GpsProvider;
+        public IGpsProvider GpsProvider { set { _sessionInternal.GpsProvider = value; } get { return _sessionInternal.GpsProvider; } }
 
         /// <summary>
         /// PoseProvider used to create this session
         /// </summary>
-        public IPoseProvider PoseProvider => _sessionInternal.PoseProvider;
+        public IPoseProvider PoseProvider { set { _sessionInternal.PoseProvider = value; } get { return _sessionInternal.PoseProvider; } }
 
         /// <summary>
         /// VideoProvider used to create this session
         /// </summary>
-        public IVideoProvider VideoProvider => _sessionInternal.VideoProvider;
+        public IVideoProvider VideoProvider { set { _sessionInternal.VideoProvider = value; } get { return _sessionInternal.VideoProvider; } }
 
         #endregion
 
@@ -86,10 +86,10 @@ namespace SturfeeVPS.Core
         /// <summary>
         /// Begins the process to perform localization to enable VPS on current session
         /// </summary>
-        /// <param name="scanType">The type of scan to be performed</param>
-        public void EnableVPS(ScanType scanType, ScanConfig scanConfig = null)
+        /// <param name="scanner">The type of scan to be performed</param>
+        public void EnableVPS(IScanner scanner, ScanConfig scanConfig = null)
         {
-            _sessionInternal.EnableVPS(scanType, scanConfig);
+            _sessionInternal.EnableVPS(scanner, scanConfig);
         }
 
         /// <summary>

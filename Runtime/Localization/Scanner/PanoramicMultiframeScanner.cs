@@ -12,7 +12,7 @@ using Quaternion = UnityEngine.Quaternion;
 
 namespace SturfeeVPS.Core
 {
-    internal class PanoramicMultiframeScanner : ScannerBase
+    public class PanoramicMultiframeScanner : ScannerBase
     {
         protected string serviceUrl;
 

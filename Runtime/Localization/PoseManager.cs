@@ -29,11 +29,8 @@ namespace SturfeeVPS.Core
             XRSession session = XRSessionManager.GetSession();
 
             if (session.Status != XRSessionStatus.Localized)
-            {
-                if (session.GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
-                    return XRSessionManager.GetSession().GetFallbackLocation();
-
-                return session.GpsProvider.GetCurrentLocation();
+            {                
+                return GpsLocation;
             }
 
             GameObject parent = new GameObject("parent");
@@ -123,6 +120,20 @@ namespace SturfeeVPS.Core
             UnityEngine.Object.Destroy(parent);
 
             return result;
+        }
+
+
+        private GeoLocation GpsLocation
+        {
+            get
+            {
+                if (XRSessionManager.GetSession().GpsProvider.GetProviderStatus() != ProviderStatus.Ready)
+                {
+                    return XRSessionManager.GetSession().GetFallbackLocation();
+                }
+
+                return XRSessionManager.GetSession().GpsProvider.GetCurrentLocation();                
+            }
         }
 
         private float CameraHeight

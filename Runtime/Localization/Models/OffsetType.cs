@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SturfeeVPS.Core
 {
-    internal enum OffsetType
+    public enum OffsetType
     {
         Quaternion,
         Euler
