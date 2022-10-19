@@ -123,8 +123,7 @@ namespace SturfeeVPS.Core
                 await CheckConnection();
 
                 var location = await GetLocation(ct);
-                CenterRef = location;
-                PositioningUtils.Init(location);
+                
 
                 SturfeeDebug.Log("Start Location : " + location.ToFormattedString());
 
@@ -468,7 +467,11 @@ namespace SturfeeVPS.Core
             }
 
             var tileService = new TileService();
-            await tileService.LoadTiles(location, (int)Config.TileSize, _token, ct);            
+            await tileService.LoadTiles(location, (int)Config.TileSize, _token, ct);
+
+            CenterRef = location;
+            PositioningUtils.Init(location);
+
             _tilesLoaded = true;
             SturfeeEventManager.Instance.TilesLoaded();
         }
