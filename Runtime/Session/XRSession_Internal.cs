@@ -111,7 +111,7 @@ namespace SturfeeVPS.Core
             LocalizationManager = new LocalizationManager();
         }
 
-        public async Task CreateSession(CancellationToken ct)
+        public async Task CreateSession(CancellationToken ct, bool skipCoverageCheck = false)
         {
             await Task.Yield();
             SturfeeEventManager.Instance.SessionInitializing();
@@ -128,7 +128,14 @@ namespace SturfeeVPS.Core
                 SturfeeDebug.Log("Start Location : " + location.ToFormattedString());
 
                 await ValidateToken(location);
-                await CheckCoverage(location);
+                if (skipCoverageCheck)
+                {
+                    SturfeeDebug.Log($" Skipping coverage check...");
+                }
+                else
+                {
+                    await CheckCoverage(location);
+                }
                 await LoadTiles(location, ct);
 
                 await Task.WhenAll(WaitForVideo(ct), WaitForPose(ct));
@@ -185,7 +192,7 @@ namespace SturfeeVPS.Core
             try
             {
                 await LocalizationManager.InitializeScan(scanner, scanConfig, _token, Config.Locale, cancellationToken);
-                await VerifySession(cancellationToken);
+                await VerifySession(cancellationToken, scanner.ScanType == ScanType.HD);    // skip coverage check if HD
 
                 SturfeeEventManager.Instance.ReadyForScan();
             }
@@ -559,7 +566,7 @@ namespace SturfeeVPS.Core
             return location;
         }
 
-        private async Task VerifySession(CancellationToken ct)
+        private async Task VerifySession(CancellationToken ct, bool skipCoverageCheck = false)
         {
             if (Status < XRSessionStatus.Ready)
             {
@@ -575,7 +582,7 @@ namespace SturfeeVPS.Core
                     SturfeeDebug.Log(" Session is not created or session creation failed. " +
                         "Attempting to create session again");
 
-                    await CreateSession(ct);
+                    await CreateSession(ct, skipCoverageCheck);
                 }
             }
         }
