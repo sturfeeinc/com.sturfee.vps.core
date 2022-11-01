@@ -43,7 +43,7 @@ namespace SturfeeVPS.Core
             await Task.WhenAll(providerTasks);
             SturfeeDebug.Log("All providers ready");
 
-            await xrSession.CheckCoverage(scanConfig.HD.Location);
+            //await xrSession.CheckCoverage(scanConfig.HD.Location);  // not needed for HD
 
             List<Task> preScanTasks = new List<Task>() {
                 //xrSession.GpsProvider.PrepareForScan(cancellationToken),      // We use site's gps
