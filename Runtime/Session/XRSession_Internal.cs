@@ -111,7 +111,7 @@ namespace SturfeeVPS.Core
             LocalizationManager = new LocalizationManager();
         }
 
-        public async Task CreateSession(CancellationToken ct, bool skipCoverageCheck = false)
+        public async Task CreateSession(CancellationToken ct, GeoLocation location = null, IScanner scanner = null)
         {
             await Task.Yield();
             SturfeeEventManager.Instance.SessionInitializing();
@@ -122,21 +122,33 @@ namespace SturfeeVPS.Core
 
                 await CheckConnection();
 
-                var location = await GetLocation(ct);
+                if (location == null)
+                {
+                    location = await GetLocation(ct);
+                }
                 
 
-                SturfeeDebug.Log("Start Location : " + location.ToFormattedString());
+                SturfeeDebug.Log("Session Location : " + location.ToFormattedString());
 
                 await ValidateToken(location);
-                if (skipCoverageCheck)
+
+                bool inCoverageArea = await CheckCoverage(location);
+                if (inCoverageArea)
                 {
-                    SturfeeDebug.Log($" Skipping coverage check...");
+                    await LoadTiles(location, ct);
                 }
                 else
-                {
-                    await CheckCoverage(location);
+                {                    
+                    if(scanner == null || scanner.ScanType == ScanType.Satellite)
+                    {
+                        throw new SessionException(ErrorMessages.NoCoverageArea);
+                    }
+                    else if(scanner.ScanType == ScanType.HD)
+                    {
+                        PositioningUtils.Init(location);
+                        SturfeeDebug.Log($" HDSCan not in coverage area. Skipping tile loading... ");
+                    }
                 }
-                await LoadTiles(location, ct);
 
                 await Task.WhenAll(WaitForVideo(ct), WaitForPose(ct));
                 
@@ -192,8 +204,7 @@ namespace SturfeeVPS.Core
             try
             {
                 await LocalizationManager.InitializeScan(scanner, scanConfig, _token, Config.Locale, cancellationToken);
-                await VerifySession(cancellationToken, scanner.ScanType == ScanType.HD);    // skip coverage check if HD
-
+                await VerifySession(cancellationToken, scanner, scanConfig);                    
                 SturfeeEventManager.Instance.ReadyForScan();
             }
             catch (Exception e)
@@ -421,10 +432,10 @@ namespace SturfeeVPS.Core
             }            
         }
 
-        public async Task CheckCoverage(GeoLocation location = null)
+        public async Task<bool> CheckCoverage(GeoLocation location = null, IScanner scanner = null)
         {
             if (_coverageChecked)
-                return;
+                return true;
 
             if (location == null)
             {
@@ -442,18 +453,32 @@ namespace SturfeeVPS.Core
             {
                 await WebServices.CheckCoverage(location, _token);
                 _coverageChecked = true;
+
+                return true;
             }
-            catch(HttpException e)
+            catch(Exception e)
             {
-                throw e.ErrorCode switch
+                if (e is HttpException)
                 {
-                    501 => new SessionException(ErrorMessages.NoCoverageArea),
-                    400 => new SessionException(ErrorMessages.Error400),
-                    403 => new SessionException(ErrorMessages.Error403),
-                    500 => new SessionException(ErrorMessages.Error500),
-                    _ => new SessionException(ErrorMessages.HttpErrorGeneric),
-                };
-            }                      
+                    var ex = (HttpException)e;
+                    if (ex.ErrorCode == 501)
+                    {
+                        return false;
+                    }
+
+                    throw ex.ErrorCode switch
+                    {
+
+                        400 => new SessionException(ErrorMessages.Error400),
+                        403 => new SessionException(ErrorMessages.Error403),
+                        500 => new SessionException(ErrorMessages.Error500),
+                        _ => new SessionException(ErrorMessages.HttpErrorGeneric),
+                    };
+                }
+
+                throw new SessionException(ErrorMessages.HttpErrorGeneric);
+            }        
+            
         }
 
         public async Task LoadTiles(GeoLocation location = null, CancellationToken ct = default)
@@ -566,7 +591,7 @@ namespace SturfeeVPS.Core
             return location;
         }
 
-        private async Task VerifySession(CancellationToken ct, bool skipCoverageCheck = false)
+        private async Task VerifySession(CancellationToken ct, IScanner scanner = null, ScanConfig scanConfig = null)
         {
             if (Status < XRSessionStatus.Ready)
             {
@@ -581,8 +606,15 @@ namespace SturfeeVPS.Core
                 {
                     SturfeeDebug.Log(" Session is not created or session creation failed. " +
                         "Attempting to create session again");
+                    if(scanner.ScanType == ScanType.HD)
+                    {
+                        await CreateSession(ct, scanConfig.HD.Location, scanner);
+                    }
+                    else
+                    {
+                        await CreateSession(ct,null, scanner);
+                    }
 
-                    await CreateSession(ct, skipCoverageCheck);
                 }
             }
         }

@@ -190,9 +190,9 @@ namespace SturfeeVPS.Core
             await _sessionInternal.ValidateToken(location);
         }
 
-        internal async Task CheckCoverage(GeoLocation location = null)
+        internal async Task<bool> CheckCoverage(GeoLocation location = null)
         {
-            await _sessionInternal.CheckCoverage(location);
+            return await _sessionInternal.CheckCoverage(location);
         }
 
         internal async Task LoadTiles(GeoLocation location = null)

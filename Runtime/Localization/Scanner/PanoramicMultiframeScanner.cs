@@ -27,25 +27,47 @@ namespace SturfeeVPS.Core
                 throw new Exception($"{ScanType} Scanner : ERROR => cannot initialize. XRSession is NULL");
             }
 
-            List<Task> providerTasks = new List<Task>() { 
-                xrSession.WaitForGps(cancellationToken),
-                xrSession.WaitForPose(cancellationToken),
-                xrSession.WaitForVideo(cancellationToken) 
-            };
-            await Task.WhenAll(providerTasks);
-            SturfeeDebug.Log("All providers ready");
+            try
+            {
 
-            await xrSession.CheckCoverage();
+                List<Task> providerTasks = new List<Task>() {
+                    xrSession.WaitForGps(cancellationToken),
+                    xrSession.WaitForPose(cancellationToken),
+                    xrSession.WaitForVideo(cancellationToken)
+                };
+                await Task.WhenAll(providerTasks);
+                SturfeeDebug.Log("All providers ready");
 
-            List<Task> preScanTasks = new List<Task>() { 
-                xrSession.GpsProvider.PrepareForScan(cancellationToken), 
-                xrSession.PoseProvider.PrepareForScan(cancellationToken), 
-                xrSession.VideoProvider.PrepareForScan(cancellationToken) 
-            };
-            await Task.WhenAll(preScanTasks);
-            SturfeeDebug.Log("All providers ready for scan");
+                if(!await xrSession.CheckCoverage())
+                {
+                    throw new IdException(ErrorMessages.NoCoverageArea);
+                }
 
-            initialized = true;
+                List<Task> preScanTasks = new List<Task>() {
+                    xrSession.GpsProvider.PrepareForScan(cancellationToken),
+                    xrSession.PoseProvider.PrepareForScan(cancellationToken),
+                    xrSession.VideoProvider.PrepareForScan(cancellationToken)
+                };
+                await Task.WhenAll(preScanTasks);
+                SturfeeDebug.Log("All providers ready for scan");
+
+                initialized = true;
+            }
+            catch (Exception e)
+            {
+                SturfeeDebug.LogError(e.Message);
+                if (e is SessionException)
+                {
+                    throw;
+                }
+
+                if(e is IdException)
+                {
+                    throw;
+                }
+
+                throw new SessionException(ErrorMessages.SessionNotReady);
+            }
         }
         
         public async override Task Connect(string accessToken, string language = "en-US")

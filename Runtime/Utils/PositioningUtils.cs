@@ -17,6 +17,7 @@ namespace SturfeeVPS.Core
 
         public static void Init(GeoLocation referenceLocation)
         {
+            SturfeeDebug.Log($"Center ref set to {referenceLocation.ToFormattedString()}");
             _referenceUtm = GeoCoordinateConverter.GpsToUtm(referenceLocation);
         }
 
