@@ -1,160 +1,137 @@
 ﻿using System;
-using System.Collections;
-using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SturfeeVPS.Core
 {
     public class SturfeeEventManager
     {
-        private static SturfeeEventManager _instance;
+        public static event SturfeeEvents.ProviderRegisterDelegate OnProviderRegister;
+        public static event SturfeeEvents.ProviderUnregisterDelegate OnProviderUnregister;
 
-        public static SturfeeEventManager Instance
+        public static event SturfeeEvents.SessionReadyAction OnSessionReady;
+        public static event SturfeeEvents.SessionDestroyAction OnSessionDestroy;
+
+        public static event SturfeeEvents.TilesLoadedAction OnTilesLoaded;
+
+        public static event SturfeeEvents.LocalizationRequestedAction OnLocalizationRequested;
+        public static event SturfeeEvents.LocalizationStartAction OnLocalizationStart;
+        public static event SturfeeEvents.LocalizationLoadingAction OnLocalizationLoading;
+        public static event SturfeeEvents.LocalizationFailAction OnLocalizationFail;
+        public static event SturfeeEvents.LocalizationSuccessfulAction OnLocalizationSuccessful;
+        public static event SturfeeEvents.LocalizationDisabledAction OnLocalizationDisabled;
+
+        internal static void SessionReady()
         {
-            get
+            SturfeeDebug.Log($" [Event] :: OnSessionReady");
+            OnSessionReady?.Invoke();
+        }
+
+        internal static void SessionDestroy()
+        {
+            SturfeeDebug.Log($" [Event] :: OnSessionDestroy");
+            OnSessionDestroy?.Invoke();
+        }
+
+        internal static void RegisterProvider<T>(T provider) where T : IProvider
+        {
+            // Tiles
+            if (typeof(T) == typeof(ITilesProvider))
             {
-                if (_instance == null)
+                var tilesProvier = (ITilesProvider)provider;
+                tilesProvier.OnTileLoaded += TileProvider_OnTileLoaded;
+            }
+
+            // Localization
+            if (typeof(T) == typeof(ILocalizationProvider))
+            {
+                var localizationProvider = (ILocalizationProvider)provider;
+                localizationProvider.OnLocalizationRequested += LocalizationProvider_OnLocalizationRequested;
+                localizationProvider.OnLocalizationStart += LocalizationProvider_OnLocalizationStart;
+                localizationProvider.OnLocalizationLoading += LocalizationProvider_OnLocalizationLoading;
+                localizationProvider.OnLocalizationFail += LocalizationProvider_OnLocalizationFail;
+                localizationProvider.OnLocalizationSuccessful += LocalizationProvider_OnLocalizationSuccessful;
+                localizationProvider.OnLocalizationDisabled += LocalizationProvider_OnLocalizationDisabled;
+            }
+
+            // TODO: Handle event subscription if any other providers have events
+
+            SturfeeDebug.Log($" [Event] :: OnProviderRegister ({provider.GetType().Name})");
+            OnProviderRegister?.Invoke(provider);
+        }
+
+        public static void UnregisterProvider<T>(T provider) where T : IProvider
+        {
+            if (provider != null)
+            {
+                // Tiles
+                if (typeof(T) == typeof(ITilesProvider))
                 {
-                    _instance = new SturfeeEventManager();
+                    var tilesProvier = (ITilesProvider)provider;
+                    tilesProvier.OnTileLoaded -= TileProvider_OnTileLoaded;
                 }
-                return _instance;
+
+                // Localization
+                if (typeof(T) == typeof(ILocalizationProvider))
+                {
+                    var localizationProvider = (ILocalizationProvider)provider;
+                    localizationProvider.OnLocalizationRequested -= LocalizationProvider_OnLocalizationRequested;
+                    localizationProvider.OnLocalizationStart -= LocalizationProvider_OnLocalizationStart;
+                    localizationProvider.OnLocalizationLoading -= LocalizationProvider_OnLocalizationLoading;
+                    localizationProvider.OnLocalizationFail -= LocalizationProvider_OnLocalizationFail;
+                    localizationProvider.OnLocalizationSuccessful -= LocalizationProvider_OnLocalizationSuccessful;
+                    localizationProvider.OnLocalizationDisabled -= LocalizationProvider_OnLocalizationDisabled;
+                }
+
+                // TODO: Handle event subscription if any other providers have events
             }
+            SturfeeDebug.Log($" [Event] :: OnProviderUnregister ({provider?.GetType().Name})");
+            OnProviderUnregister?.Invoke(provider);
         }
 
-        /// <summary>
-        /// Fires when XR Session is initializing
-        /// </summary>
-        public event SturfeeEvents.SessionInitializeAction OnSessionInitializing;
-
-        /// <summary>
-        /// Fires when tiles are loaded in session
-        /// </summary>
-        public event SturfeeEvents.TilesLoadedAction OnTilesLoaded;
-
-        /// <summary>
-        /// Fires when XR Session is initialized and ready.
-        /// </summary>
-        public event SturfeeEvents.SessionReadyAction OnSessionReady;
-
-        /// <summary>
-        /// Fires when XR Session creation failed
-        /// </summary>
-        public event SturfeeEvents.SessionFailAction OnSessionFail;
-
-        /// <summary>
-        /// Fires after localization request is successful
-        /// </summary>
-        public event SturfeeEvents.LocalizationSuccessfulAction OnLocalizationSuccessful;
-
-        /// <summary>
-        /// Fires after SDK is ready to scan for localization
-        /// </summary>
-        public event SturfeeEvents.ScanReadyAction OnReadyForScan;
-
-        /// <summary>
-        /// Fires after every frame capture during localization
-        /// </summary>
-        public event SturfeeEvents.OnFrameCaptured OnFrameCaptured;
-
-        /// <summary>
-        /// Fires when alignment request is made.
-        /// </summary>
-        public event SturfeeEvents.LocalizationLoadingAction OnLocalizationLoading;
-
-        /// <summary>
-        /// Fires when localization request fails.
-        /// </summary>
-        public event SturfeeEvents.LocalizationFailAction OnLocalizationFail;
-
-        public static void Destroy()
+        private static void TileProvider_OnTileLoaded()
         {
-            if (_instance != null)
-            {
-                _instance = null;
-            }
+            SturfeeDebug.Log($" [Event] :: OnTilesLoaded");
+            OnTilesLoaded?.Invoke();
         }
 
-        internal void SessionInitializing()
+        private static void LocalizationProvider_OnLocalizationRequested()
         {
-            XRSessionManager.GetSession().Status = XRSessionStatus.Initializing;
-            OnSessionInitializing?.Invoke();
+            SturfeeDebug.Log($" [Event] :: OnLocalizationRequested");
+            OnLocalizationRequested?.Invoke();
         }
 
-        internal void TilesLoaded()
+        private static void LocalizationProvider_OnLocalizationStart()
         {
-            XRSessionManager.GetSession().StartCoroutine(InvokeEventDelayed(() =>
-            {
-                OnTilesLoaded?.Invoke();
-            }));
+            SturfeeDebug.Log($" [Event] :: OnLocalizationStart");
+            OnLocalizationStart?.Invoke();
         }
 
-        internal void SessionIsReady()
+        private static void LocalizationProvider_OnLocalizationDisabled()
         {
-            XRSessionManager.GetSession().Status = XRSessionStatus.Ready;
-            XRSessionManager.GetSession().StartCoroutine(InvokeEventDelayed(() =>
-            {
-                OnSessionReady?.Invoke();
-            }));
+            SturfeeDebug.Log($" [Event] :: OnLocalizationDisabled");
+            OnLocalizationDisabled?.Invoke();
         }
 
-        internal void SessionFail((string, string) error)
+        private static void LocalizationProvider_OnLocalizationSuccessful()
         {
-            SturfeeDebug.LogError("Session Fail : " + error.Item2);
-            XRSessionManager.GetSession().Status = XRSessionStatus.NotCreated;
-            XRSessionManager.GetSession().StartCoroutine(InvokeEventDelayed(() =>
-            {
-                OnSessionFail?.Invoke(error.Item2, error.Item1);
-            }));
+            SturfeeDebug.Log($" [Event] :: OnLocalizationSuccessful");
+            OnLocalizationSuccessful?.Invoke();
         }
 
-        internal void ReadyForScan()
+        private static void LocalizationProvider_OnLocalizationFail(string error)
         {
-            XRSessionManager.GetSession().StartCoroutine(InvokeEventDelayed(() =>
-            {
-                OnReadyForScan?.Invoke();
-            }));
+            SturfeeDebug.Log($" [Event] :: OnLocalizationFail");
+            OnLocalizationFail?.Invoke(error);
         }
 
-        internal void LocalizationLoading()
+        private static void LocalizationProvider_OnLocalizationLoading()
         {
-            XRSessionManager.GetSession().Status = XRSessionStatus.Loading;
-            XRSessionManager.GetSession().StartCoroutine(InvokeEventDelayed(() =>
-            {
-                OnLocalizationLoading?.Invoke();
-            }));
+            SturfeeDebug.Log($" [Event] :: OnLocalizationLoading");
+            OnLocalizationLoading?.Invoke();
         }
 
-        internal void LocalizationFail((string, string) error )
-        {
-            SturfeeDebug.LogError("Localization Fail : " + error.Item2);
-            XRSessionManager.GetSession().Status = XRSessionStatus.Ready;
-            XRSessionManager.GetSession().StartCoroutine(InvokeEventDelayed(() =>
-            {
-                OnLocalizationFail?.Invoke(error.Item2, error.Item1);
-            }));
-        }
-
-        internal void FrameCaptured(int frameNum, LocalizationRequest localizationRequest, byte[] image)
-        {
-            XRSessionManager.GetSession().Status = XRSessionStatus.Scanning;
-            XRSessionManager.GetSession().StartCoroutine(InvokeEventDelayed(() =>
-            {
-                OnFrameCaptured?.Invoke(frameNum, localizationRequest, image);
-            }));
-        }
-
-        internal void LocalizationSuccessful()
-        {
-            XRSessionManager.GetSession().Status = XRSessionStatus.Localized;
-            XRSessionManager.GetSession().StartCoroutine(InvokeEventDelayed(() =>
-            {
-                OnLocalizationSuccessful?.Invoke();
-            }));
-        }
-
-        private IEnumerator InvokeEventDelayed(Action callback)
-        {
-            yield return new WaitForEndOfFrame();
-            callback();
-        }
     }
 }

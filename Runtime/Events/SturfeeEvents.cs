@@ -4,9 +4,16 @@ namespace SturfeeVPS.Core
     public class SturfeeEvents
     {
         /// <summary>
-        /// Event that is fired when the session is initialized
+        /// Event fired when a provider is registered to session
         /// </summary>
-        public delegate void SessionInitializeAction();
+        /// <param name="provider">provider that is registered</param>
+        public delegate void ProviderRegisterDelegate(IProvider provider);
+
+        /// <summary>
+        /// Event fired when a provider is unregistered from session
+        /// </summary>
+        /// <param name="provider">provider that was unregistered</param>
+        public delegate void ProviderUnregisterDelegate(IProvider provider);
 
         /// <summary>
         /// Event that is fired when tiles are loaded for session
@@ -19,23 +26,19 @@ namespace SturfeeVPS.Core
         public delegate void SessionReadyAction();
 
         /// <summary>
-        /// Event that is fired when SDK Session is ready to perform a scan for localization
+        /// Event that is fired when the session is destroyed
         /// </summary>
-        public delegate void ScanReadyAction();
+        public delegate void SessionDestroyAction();
 
         /// <summary>
-        /// Event that is fired when session creation failed
+        /// Event fired when localization is requested
         /// </summary>
-        /// <param name="error"></param>
-        /// <param name="errorId"></param>
-        public delegate void SessionFailAction(string error, string errorId);
+        public delegate void LocalizationRequestedAction();
 
         /// <summary>
-        /// Event that is fired when a frame is captured during localization
+        /// Fire when localization process starts
         /// </summary>
-        /// <param name="frameNum"> Current capture number</param>
-        /// <param name="localizationRequest"> Captured request details</param>
-        public delegate void OnFrameCaptured(int frameNum, LocalizationRequest localizationRequest, byte[] image);
+        public delegate void LocalizationStartAction();
 
         /// <summary>
         /// Event fired after successful localization
@@ -50,6 +53,11 @@ namespace SturfeeVPS.Core
         /// <summary>
         /// Event that is fired when alignment fails.
         /// </summary>
-        public delegate void LocalizationFailAction(string error, string id);
+        public delegate void LocalizationFailAction(string error);
+
+        /// <summary>
+        /// Event that is fired when localization is disabled for the session
+        /// </summary>
+        public delegate void LocalizationDisabledAction();
     }
 }

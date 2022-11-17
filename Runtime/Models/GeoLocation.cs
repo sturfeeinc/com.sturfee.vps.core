@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SturfeeVPS.Core
 {
     [Serializable]
-    public class GeoLocation
+    public class GeoLocation : IEquatable<GeoLocation>
     {
         public double Latitude;
         public double Longitude;
@@ -28,6 +28,15 @@ namespace SturfeeVPS.Core
 
             float distance = (float)Math.Sqrt(difference.x * difference.x + difference.y* difference.y + difference.z * difference.z);
             return distance;
+        }
+
+        public bool Equals(GeoLocation other)
+        {
+            double lat = Math.Abs(Latitude - other.Latitude);
+            double lon = Math.Abs(Longitude - other.Longitude);
+            double altitude = Math.Abs(Altitude - other.Altitude);
+
+            return lat < 0.001f && lon < 0.001f &&  altitude < 0.001f;
         }
 
         public GeoLocation() { }

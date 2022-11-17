@@ -12,9 +12,9 @@ namespace SturfeeVPS.Core
     public interface IProvider
     {
         /// <summary>
-        /// Initialize this Provider. Will be called when session is getting created
+        /// Initialize this Provider.
         /// </summary>
-        void Initialize();
+        void OnRegister();
 
         /// <summary>
         /// Gets provider's current status
@@ -23,15 +23,9 @@ namespace SturfeeVPS.Core
         ProviderStatus GetProviderStatus();
 
         /// <summary>
-        /// Prepare this provider to be ready for scanning 
-        /// </summary>
-        Task PrepareForScan(CancellationToken token);
-
-        /// <summary>
         /// Destroy any Objects/GameObjects that were created using this provider
         /// </summary>
-        void Destroy();
+        void OnUnregister();
 
-        
     }
 }

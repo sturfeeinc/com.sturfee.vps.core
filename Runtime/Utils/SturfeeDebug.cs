@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace SturfeeVPS.Core
@@ -13,8 +15,6 @@ namespace SturfeeVPS.Core
 
     public static class SturfeeDebug
     {
-        public static readonly string STURFEE_XR = "SturfeeXR";
-
         private static LogType _logType = LogType.Log;
         private static readonly string _fileName = "sturfee_debug_log.txt";
         private static string _fileLocation;
@@ -34,31 +34,37 @@ namespace SturfeeVPS.Core
 
         public static void Log(string info, bool addToConsole = true)
         {
-            File.AppendAllText(FileLocation, DateTime.Now.ToString(@"MM/dd/yyyy hh:mm:ss.f") + ": " + "[" + STURFEE_XR + "] : " + info + Environment.NewLine);
+            var assemblyName = Assembly.GetCallingAssembly().GetName().Name;
+            var tag = $"SturfeeXR.{assemblyName.Split('.').Last()}";
+            File.AppendAllText(FileLocation, DateTime.Now.ToString(@"MM/dd/yyyy hh:mm:ss.f") + ": " + "[" + tag + "] : " + info + Environment.NewLine);
 
             if (addToConsole)
             {
-                AddToConsole("[" + STURFEE_XR + "] : " + info, LogType.Log);
+                AddToConsole("[" + tag + "] : " + info, LogType.Log);
             }
         }
 
         public static void LogError(string info, bool addToConsole = true)
         {
-            File.AppendAllText(FileLocation, DateTime.Now.ToString(@"MM/dd/yyyy hh:mm:ss.f") + ": " + "[" + STURFEE_XR + "] : " + info + Environment.NewLine);
+            var assemblyName = Assembly.GetCallingAssembly().GetName().Name;
+            var tag = $"SturfeeXR.{assemblyName.Split('.').Last()}";
+            File.AppendAllText(FileLocation, DateTime.Now.ToString(@"MM/dd/yyyy hh:mm:ss.f") + ": " + "[" + tag + "] : " + info + Environment.NewLine);
 
             if (addToConsole)
             {
-                AddToConsole("[" + STURFEE_XR + "] : " + info, LogType.Error);
+                AddToConsole("[" + tag + "] : " + info, LogType.Error);
             }
         }
 
         public static void LogWarning(string info, bool addToConsole = true)
         {
-            File.AppendAllText(FileLocation, DateTime.Now.ToString(@"MM/dd/yyyy hh:mm:ss.f") + ": " + "[" + STURFEE_XR + "] : " + info + Environment.NewLine);
+            var assemblyName = Assembly.GetCallingAssembly().GetName().Name;
+            var tag = $"SturfeeXR.{assemblyName.Split('.').Last()}";
+            File.AppendAllText(FileLocation, DateTime.Now.ToString(@"MM/dd/yyyy hh:mm:ss.f") + ": " + "[" + tag + "] : " + info + Environment.NewLine);
 
             if (addToConsole)
             {
-                AddToConsole("[" + STURFEE_XR + "] : " + info, LogType.Warning);
+                AddToConsole("[" + tag + "] : " + info, LogType.Warning);
             }
         }
 
