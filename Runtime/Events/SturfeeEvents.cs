@@ -21,6 +21,11 @@ namespace SturfeeVPS.Core
         public delegate void TilesLoadedAction();
 
         /// <summary>
+        /// Event that is fired when tile loading failed
+        /// </summary>
+        public delegate void TilesLoadingFailAction(string error);
+
+        /// <summary>
         /// Event that is fired when the session is ready
         /// </summary>
         public delegate void SessionReadyAction();

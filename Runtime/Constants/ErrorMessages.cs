@@ -21,23 +21,6 @@ public static class ErrorMessages
 
     #endregion
 
-    #region Providers
-    public static (string, string) ProvidersTimeout = ("ProvidersTimeout", " Session TimeOut");
-
-    public static (string, string) GpsNotReadyForScan = ("GpsNotreadyForScan", " GPS Provider not ready for scan");
-    public static (string, string) GpsProviderNotSupported = ("GpsProviderNotSupported", " GPS Error");
-    public static (string, string) GpsProviderTimeout = ("GpsProviderTimeout", " GPS TimeOut");
-
-    public static (string, string) PoseNotReadyForScan = ("PoseNotreadyForScan", " Pose Provider not ready for scan");
-    public static (string, string) PoseProviderNotSupported = ("PoseProviderNotSupported", " IMU Error");
-    public static (string, string) PoseProviderTimeout = ("PoseProviderTimeout", " Pose/IMU TimeOut");
-
-    public static (string, string) VideoNotReadyForScan = ("VideoNotreadyForScan", " Video Provider not ready for scan");
-    public static (string, string) VideoProviderNotSupported = ("VideoProviderNotSupported", " Camera Error");
-    public static (string, string) VideoProviderTimeout = ("VideoProviderTimeout", " Video Camera TimeOut");
-
-    #endregion
-
     #region Localization
     public static (string, string) PitchError = ("PitchError", "Please look forward while scanning");
     public static (string, string) RollError = ("RollError", "Please do not tilt your phone while scannning");
