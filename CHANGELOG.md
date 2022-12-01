@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.0.0] - 2022-12-01
+
+### Changes
+
+- First 4.0 release
+- XrSession is agnostic to AR/VR 
+- All AR logic (VPS localizatin, occlusion, etc) can now be optionally injected to XrSession
+
 ## [3.2.0] - 2022-09-16
 
 ### Changes
