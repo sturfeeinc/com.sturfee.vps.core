@@ -27,6 +27,8 @@ namespace SturfeeVPS.Core
         public Vector3 PositionOffset => _sesssionPoseManager.PositionOffset;
         public Quaternion RotationOffset => _sesssionPoseManager.RotationOffset;
 
+        public void SetPrintDebug(bool _value) => _sesssionPoseManager.SetPrintDebug(_value);
+
         public void RegisterProvider<T>(T provider) where T : IProvider
         {            
             SturfeeDebug.Log($" Registering {provider.GetType().Name} as {typeof(T).Name}");

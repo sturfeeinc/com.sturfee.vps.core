@@ -64,5 +64,12 @@ namespace SturfeeVPS.Core
         /// Event that is fired when localization is disabled for the session
         /// </summary>
         public delegate void LocalizationDisabledAction();
+
+        /// <summary>
+        /// Event that is fired when Debug Button is pressed
+        /// </summary>
+        public delegate void DebugButtonPressedAction();
+
+        
     }
 }

@@ -9,10 +9,12 @@ namespace SturfeeVPS.Core
 {
     internal class XrSesssionPoseManager
     {
-
         private GeoLocation _startLocation;
         private GameObject _localizedOrigin;
         private Vector3 _shift;
+
+        private GameObject _parent = new GameObject();
+        private GameObject _child = new GameObject();
 
         public XrSesssionPoseManager(GeoLocation location)
         {
@@ -20,6 +22,20 @@ namespace SturfeeVPS.Core
             _localizedOrigin = new GameObject("_localizationHelper");
 
             SturfeeEventManager.OnLocalizationStart += OnLocalizationStart;
+            SturfeeEventManager.OnLocalizationDisabled += OnLocalizationDisabled;
+        }
+
+        // may or may not need
+        private void OnLocalizationDisabled()
+        {
+            _shift = Vector3.zero;
+        }
+
+        // FOR DEBUG
+        private bool PrintDebug = false;
+        public void SetPrintDebug(bool _value)
+        {
+            PrintDebug = _value;
         }
 
         public GeoLocation Location
@@ -38,12 +54,18 @@ namespace SturfeeVPS.Core
 
                 // shift delta origin to where localization was started.
                 // This is because after localization we need delta from only from localization point and not from center ref
-                var shift = RotateWithOffset(_shift);
+                var shift = RotateWithOffset(Shift);
 
                 var result = world + delta - shift;
                 result.z = altitude;
 
                 //Debug.Log($"Location : {location.ToFormattedString()}, world : {world}, delta : {delta} , shift : {shift}, altitude : {altitude} ");
+
+                // FOR DEBUG
+                if (PrintDebug)
+                {
+                    SturfeeDebug.Log($"[XrSesssionPoseManager.cs] [DEBUG BUTTON PRESS] world: {world}, result: {result}, shift without rotation offset: {Shift}, shift with rotation offset: {shift}, delta position without rotation offset: {GetDeltaPosition(out _)}, delta position with rotation offset: {delta}");
+                }
 
                 return PositioningUtils.WorldToGeoLocation(result);
             }
@@ -118,6 +140,11 @@ namespace SturfeeVPS.Core
             get
             {
                 var localPos = PositioningUtils.GeoToWorldPosition(Location);
+
+                // FOR DEBUG
+                if (PrintDebug)
+                    SturfeeDebug.Log($"[XrSesssionPoseManager.cs] [DEBUG BUTTON PRESS] localPos: {localPos}");
+
                 var poseProvider = IOC.Resolve<IPoseProvider>();
                 if(poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
                 {
@@ -170,6 +197,19 @@ namespace SturfeeVPS.Core
             }
 
             return altitude;
+        }
+
+        private Vector3 Shift
+        {
+            get
+            {
+                var localizationProvider = IOC.Resolve<ILocalizationProvider>();
+                if (localizationProvider != null && localizationProvider.GetProviderStatus() == ProviderStatus.Ready)
+                {
+                    return _shift;
+                }
+                return Vector3.zero;
+            }
         }
 
         private float Elevation
@@ -243,11 +283,23 @@ namespace SturfeeVPS.Core
         /// <summary>
         /// Gets position in world obtained after applying Localization offset
         /// </summary>
-        private Vector3 RotateWithOffset(Vector3 pos)
+        // private Vector3 RotateWithOffset(Vector3 pos)
+        // {
+        //     _localizedOrigin.transform.rotation = RotationOffset;
+        //     var rotated = _localizedOrigin.transform.InverseTransformPoint(pos);
+        //     return rotated;
+        // }
+        private Vector3 RotateWithOffset(Vector3 point)
         {
-            _localizedOrigin.transform.rotation = RotationOffset;
-            var rotated = _localizedOrigin.transform.InverseTransformPoint(pos);
-            return rotated;
+            
+            _parent.transform.rotation = RotationOffset;
+
+            _child.transform.parent = _parent.transform;
+            _child.transform.localPosition = point;
+
+            Vector3 result = _child.transform.position;
+
+            return result;
         }
 
         private void OnLocalizationStart()
@@ -260,6 +312,5 @@ namespace SturfeeVPS.Core
 
             SturfeeDebug.Log($"[XRSessionPoseManager] :: OnLocalizationStart : DeltaAtLocalizationStart {_shift}");
         }
-
     }
 }

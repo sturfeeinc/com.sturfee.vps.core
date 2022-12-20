@@ -25,6 +25,13 @@ namespace SturfeeVPS.Core
         public static event SturfeeEvents.LocalizationSuccessfulAction OnLocalizationSuccessful;
         public static event SturfeeEvents.LocalizationDisabledAction OnLocalizationDisabled;
 
+        // FOR DEBUG
+        public static event SturfeeEvents.DebugButtonPressedAction OnDebugButtonPressed;
+        public static void TriggerSturfeeDebugs()
+        {
+            SturfeeEventManager.OnDebugButtonPressed?.Invoke();
+        }
+
         internal static void SessionReady()
         {
             SturfeeDebug.Log($" [Event] :: OnSessionReady");
