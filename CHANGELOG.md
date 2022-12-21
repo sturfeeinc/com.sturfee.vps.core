@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.0.1] - 2022-12-21
+
+### Changes
+
+- First localization issue
+
 ## [4.0.0] - 2022-12-01
 
 ### Changes
