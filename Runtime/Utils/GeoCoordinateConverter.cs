@@ -151,8 +151,10 @@ namespace SturfeeVPS.Core
         }
 
 
-        private static void UtmToWgs84(UtmPosition utm, ref GeoLocation gps)
+        private static void UtmToWgs84(UtmPosition utmPosition, ref GeoLocation gps)
         {
+            UtmPosition utm = new UtmPosition(utmPosition);
+
             utm.X -= 500000.0;
             utm.X /= UTMScaleFactor;
 

@@ -1,54 +1,51 @@
-﻿namespace SturfeeVPS.Core
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SturfeeVPS.Core
 {
-    public static class XRSessionManager
+    public static class XrSessionManager
     {
-        private static XRSession _session;
+        private static XrSession _session;
 
-        /// <summary>
-        /// Creates an XRSession based on providers provided in <see cref="XRSessionConfig"/>
-        /// </summary>
-        /// <param name="xRSessionConfig"> Configuration for creating this session</param>
-        public static void CreateSession(XRSessionConfig xRSessionConfig)
+        public static XrSession CreateSession(GeoLocation location)
         {
-            if (_session != null)
+            if(_session != null)
             {
-                SturfeeDebug.LogError("An XRSession is already active. " +
-                    "Cannot create multiple XRSessions. Please destroy current active XRSession before" +
-                    "creating a new session.");
+                SturfeeDebug.LogError("Cannot create multiple XrSessions");
+                throw new Exception("Cannot create multiple XrSessions");
             }
-            _session = new XRSession(xRSessionConfig);
+
+            _session = new XrSession(location);
+            _session.OnSessionReady += OnSessionReady;
+
+            _session.CreateSession();
+
+            return _session;
         }
 
-        /// <summary>   
-        /// Gets Current active XRSession
-        /// </summary>
-        /// <returns><see cref="XRSession"/></returns>
-        public static XRSession GetSession()
+        public static XrSession GetSession()
         {
-            if (_session != null)
-            {
-                return _session;
-            }
-            else
-            {
-                SturfeeDebug.LogWarning("No active XRSession. Please create one using CreateSession()");
-            }
-
-            return null;
+            return _session;
         }
 
-        /// <summary>
-        /// Destroys Current active XRSession
-        /// </summary>
         public static void DestroySession()
         {
             if (_session != null)
             {
-                _session.DestroySession();
+                _session.OnSessionReady -= OnSessionReady;
                 _session = null;
-            }
 
-            SturfeeEventManager.Destroy();
+                SturfeeEventManager.SessionDestroy();
+            }
         }
+
+        private static void OnSessionReady()
+        {
+            SturfeeEventManager.SessionReady();
+        }
+
     }
 }

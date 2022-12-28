@@ -1,9 +1,7 @@
 {
     "name": "SturfeeVPS.Core",
-    "rootNamespace": "",
-    "references": [
-        "GUID:18d18f811ba286c49814567a3cfba688"
-    ],
+    "rootNamespace": "SturfeeVPS.Core",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

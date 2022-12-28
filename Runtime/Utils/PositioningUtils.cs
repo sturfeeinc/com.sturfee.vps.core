@@ -15,9 +15,18 @@ namespace SturfeeVPS.Core
             }
         }
 
+        public static GeoLocation GetReferenceLocation
+        {
+            get
+            {
+                return GeoCoordinateConverter.UtmToGps(_referenceUtm);
+            }
+        }
+
         public static void Init(GeoLocation referenceLocation)
         {
             _referenceUtm = GeoCoordinateConverter.GpsToUtm(referenceLocation);
+            SturfeeDebug.Log($"Center ref set tot {referenceLocation.ToFormattedString()}");
         }
 
         public static Vector3 GeoToWorldPosition(GeoLocation location)

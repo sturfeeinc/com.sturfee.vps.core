@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SturfeeVPS.Core
@@ -8,9 +10,16 @@ namespace SturfeeVPS.Core
     public interface IGpsProvider : IProvider
     {
         /// <summary>
-        /// Gets the current Geo-spatial Location.
+        /// Gets precise current Geo-spatial Location.
         /// </summary>
         /// <returns>The Geo-spatial Location.</returns>
-        GeoLocation GetCurrentLocation();
+        GeoLocation GetFineLocation(out bool includesElevation);
+
+        /// <summary>
+        /// Gets approximate current Geo-spatial Location.
+        /// </summary>
+        /// <returns>The Geo-spatial Location.</returns>        
+        GeoLocation GetApproximateLocation(out bool includesElevation);
+
     }
 }
