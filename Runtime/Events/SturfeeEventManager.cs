@@ -43,6 +43,8 @@ namespace SturfeeVPS.Core
         internal static void SessionDestroy()
         {
             SturfeeDebug.Log($" [Event] :: OnSessionDestroy");
+            // AVATAR VISBILITY SETTING
+            AvatarOn = false;
             OnSessionDestroy?.Invoke();
         }
 
