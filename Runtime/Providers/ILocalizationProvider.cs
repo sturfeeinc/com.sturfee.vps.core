@@ -17,6 +17,7 @@ namespace SturfeeVPS.Core
         Quaternion YawOffset {  get; }
         Quaternion PitchOffset { get; }
         Quaternion RollOffset { get; }
+        string trackingID { get; }
 
         Vector3 EulerOffset { get; }
 

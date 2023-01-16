@@ -12,6 +12,7 @@ namespace SturfeeVPS.Core
         private GeoLocation _startLocation;
         private GameObject _localizedOrigin;
         private Vector3 _shift;
+        private Quaternion _shiftRotation;
 
         private GameObject _parent = new GameObject();
         private GameObject _child = new GameObject();
@@ -29,6 +30,7 @@ namespace SturfeeVPS.Core
         private void OnLocalizationDisabled()
         {
             _shift = Vector3.zero;
+            _shiftRotation = Quaternion.identity;
         }
 
         // FOR DEBUG
@@ -199,7 +201,7 @@ namespace SturfeeVPS.Core
             return altitude;
         }
 
-        private Vector3 Shift
+        public Vector3 Shift
         {
             get
             {
@@ -209,6 +211,19 @@ namespace SturfeeVPS.Core
                     return _shift;
                 }
                 return Vector3.zero;
+            }
+        }
+
+        public Quaternion ShiftRotation
+        {
+            get
+            {
+                var localizationProvider = IOC.Resolve<ILocalizationProvider>();
+                if (localizationProvider != null && localizationProvider.GetProviderStatus() == ProviderStatus.Ready)
+                {
+                    return _shiftRotation;
+                }
+                return Quaternion.identity;
             }
         }
 
@@ -308,6 +323,7 @@ namespace SturfeeVPS.Core
             if (poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
             {
                 _shift = poseProvider.GetPosition(out bool includesElevation);
+                _shiftRotation = poseProvider.GetRotation();
             }
 
             SturfeeDebug.Log($"[XRSessionPoseManager] :: OnLocalizationStart : DeltaAtLocalizationStart {_shift}");

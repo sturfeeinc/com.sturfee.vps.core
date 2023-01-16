@@ -26,6 +26,8 @@ namespace SturfeeVPS.Core
         public Quaternion Orientation => _sesssionPoseManager.Orientation;
         public Vector3 PositionOffset => _sesssionPoseManager.PositionOffset;
         public Quaternion RotationOffset => _sesssionPoseManager.RotationOffset;
+        public Vector3 Shift => _sesssionPoseManager.Shift;
+        public Quaternion ShiftRotation => _sesssionPoseManager.ShiftRotation;
 
         public void SetPrintDebug(bool _value) => _sesssionPoseManager.SetPrintDebug(_value);
 
