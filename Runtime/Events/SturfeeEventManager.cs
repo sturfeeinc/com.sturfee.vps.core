@@ -25,6 +25,8 @@ namespace SturfeeVPS.Core
         public static event SturfeeEvents.LocalizationSuccessfulAction OnLocalizationSuccessful;
         public static event SturfeeEvents.LocalizationDisabledAction OnLocalizationDisabled;
 
+        public static event SturfeeEvents.DTIndoorLoadedAction OnDTIndoorLoaded;
+
         public static bool AvatarOn = false;
 
         // FOR DEBUG
@@ -156,5 +158,9 @@ namespace SturfeeVPS.Core
             OnLocalizationLoading?.Invoke();
         }
 
+        public static void ShopEditSceneLoader_OnDTIndoorLoaded()
+        {
+            OnDTIndoorLoaded?.Invoke();
+        }
     }
 }

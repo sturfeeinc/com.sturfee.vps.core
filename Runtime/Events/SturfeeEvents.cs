@@ -70,6 +70,11 @@ namespace SturfeeVPS.Core
         /// </summary>
         public delegate void DebugButtonPressedAction();
 
+        /// <summary>
+        /// Event that is fired when DT Indoor is loaded
+        /// </summary>
+        public delegate void DTIndoorLoadedAction();
+
         
     }
 }
