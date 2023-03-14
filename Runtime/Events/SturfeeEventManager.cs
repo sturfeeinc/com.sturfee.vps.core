@@ -158,7 +158,7 @@ namespace SturfeeVPS.Core
             OnLocalizationLoading?.Invoke();
         }
 
-        public static void ShopEditSceneLoader_OnDTIndoorLoaded()
+        public static void DtLoader_OnDTIndoorLoaded()
         {
             OnDTIndoorLoaded?.Invoke();
         }
