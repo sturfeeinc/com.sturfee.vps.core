@@ -55,9 +55,9 @@ namespace SturfeeVPS.Core
             // Tiles
             if (typeof(T) == typeof(ITilesProvider))
             {
-                var tilesProvier = (ITilesProvider)provider;
-                tilesProvier.OnTileLoaded += TileProvider_OnTileLoaded;
-                tilesProvier.OnTileLoadingFail += TilesProvier_OnTileLoadingFail;
+                var tilesProvider = (ITilesProvider)provider;
+                tilesProvider.OnTileLoaded += TileProvider_OnTileLoaded;
+                tilesProvider.OnTileLoadingFail += TilesProvider_OnTileLoadingFail;
             }
 
             // Localization
@@ -87,9 +87,9 @@ namespace SturfeeVPS.Core
                 // Tiles
                 if (typeof(T) == typeof(ITilesProvider))
                 {
-                    var tilesProvier = (ITilesProvider)provider;
-                    tilesProvier.OnTileLoaded -= TileProvider_OnTileLoaded;
-                    tilesProvier.OnTileLoadingFail -= TilesProvier_OnTileLoadingFail;
+                    var tilesProvider = (ITilesProvider)provider;
+                    tilesProvider.OnTileLoaded -= TileProvider_OnTileLoaded;
+                    tilesProvider.OnTileLoadingFail -= TilesProvider_OnTileLoadingFail;
                 }
 
                 // Localization
@@ -116,7 +116,7 @@ namespace SturfeeVPS.Core
             OnTilesLoaded?.Invoke();
         }
 
-        private static void TilesProvier_OnTileLoadingFail(string error)
+        private static void TilesProvider_OnTileLoadingFail(string error)
         {
             SturfeeDebug.Log($" [Event] :: OnTileLoadingFail");
             OnTileLoadingFail?.Invoke(error);

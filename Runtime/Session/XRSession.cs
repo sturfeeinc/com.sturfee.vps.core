@@ -9,25 +9,25 @@ namespace SturfeeVPS.Core
 
 
     [Serializable]
-    public class XrSession 
+    public class XrSession
     {
         internal event SessionReadyAction OnSessionReady;
 
         private GeoLocation _startLocation;
-        private XrSesssionPoseManager _sesssionPoseManager;
+        private XrSessionPoseManager _sessionPoseManager;
 
         internal XrSession(GeoLocation location)
         {            
             _startLocation = location;
-            _sesssionPoseManager = new XrSesssionPoseManager(location);
+            _sessionPoseManager = new XrSessionPoseManager(location);
         }
 
-        public GeoLocation Location  => _sesssionPoseManager.Location;            
-        public Quaternion Orientation => _sesssionPoseManager.Orientation;
-        public Vector3 PositionOffset => _sesssionPoseManager.PositionOffset;
-        public Quaternion RotationOffset => _sesssionPoseManager.RotationOffset;
+        public GeoLocation Location  => _sessionPoseManager.Location;            
+        public Quaternion Orientation => _sessionPoseManager.Orientation;
+        public Vector3 PositionOffset => _sessionPoseManager.PositionOffset;
+        public Quaternion RotationOffset => _sessionPoseManager.RotationOffset;
 
-        public void SetPrintDebug(bool _value) => _sesssionPoseManager.SetPrintDebug(_value);
+        public void SetPrintDebug(bool _value) => _sessionPoseManager.SetPrintDebug(_value);
 
         public void RegisterProvider<T>(T provider) where T : IProvider
         {            

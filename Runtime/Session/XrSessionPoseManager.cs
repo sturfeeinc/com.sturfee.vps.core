@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace SturfeeVPS.Core
 {
-    internal class XrSesssionPoseManager
+    internal class XrSessionPoseManager
     {
         private GeoLocation _startLocation;
         private GameObject _localizedOrigin;
@@ -16,7 +16,7 @@ namespace SturfeeVPS.Core
         private GameObject _parent = new GameObject();
         private GameObject _child = new GameObject();
 
-        public XrSesssionPoseManager(GeoLocation location)
+        public XrSessionPoseManager(GeoLocation location)
         {
             _startLocation = location;
             _localizedOrigin = new GameObject("_localizationHelper");
@@ -64,7 +64,7 @@ namespace SturfeeVPS.Core
                 // FOR DEBUG
                 if (PrintDebug)
                 {
-                    SturfeeDebug.Log($"[XrSesssionPoseManager.cs] [DEBUG BUTTON PRESS] world: {world}, result: {result}, shift without rotation offset: {Shift}, shift with rotation offset: {shift}, delta position without rotation offset: {GetDeltaPosition(out _)}, delta position with rotation offset: {delta}");
+                    SturfeeDebug.Log($"[XrSessionPoseManager.cs] [DEBUG BUTTON PRESS] world: {world}, result: {result}, shift without rotation offset: {Shift}, shift with rotation offset: {shift}, delta position without rotation offset: {GetDeltaPosition(out _)}, delta position with rotation offset: {delta}");
                 }
 
                 return PositioningUtils.WorldToGeoLocation(result);
@@ -143,7 +143,7 @@ namespace SturfeeVPS.Core
 
                 // FOR DEBUG
                 if (PrintDebug)
-                    SturfeeDebug.Log($"[XrSesssionPoseManager.cs] [DEBUG BUTTON PRESS] localPos: {localPos}");
+                    SturfeeDebug.Log($"[XrSessionPoseManager.cs] [DEBUG BUTTON PRESS] localPos: {localPos}");
 
                 var poseProvider = IOC.Resolve<IPoseProvider>();
                 if(poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
