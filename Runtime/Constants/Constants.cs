@@ -16,6 +16,7 @@ namespace SturfeeVPS.Core.Constants
         public static readonly string SturfeeXrSessionVR = "SturfeeXrSession-VR";
         public static readonly string SturfeeXrSessionARVR = "SturfeeXrSession-AR+VR";
 
+        public static readonly string DTHD_API_URL = "https://digitaltwin.sturfee.com";
         public static readonly string DTHD_LAYOUT = "https://digitaltwin.sturfee.com/hd/layout";
         private static readonly string _TestID = "3745b04f-7465-4533-b84f-406690685845";
 
