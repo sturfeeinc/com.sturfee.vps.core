@@ -15,8 +15,8 @@ namespace SturfeeVPS.Core.Models
         public string DtHdAssetId;
         public string DtHdAssetItemId;
         public string Name;
-        public DateTime CreatedDate;
-        public DateTime UpdatedDate;
+        public DateTime? CreatedDate;
+        public DateTime? UpdatedDate;
         public GeoLocation Location;
         public float LocalX;
         public float LocalY;
@@ -52,8 +52,8 @@ namespace SturfeeVPS.Core.Models
         public string FileUrl;
         public int FileSizeBytes;
         public string Format;
-        public DateTime CreatedDate;
-        public DateTime UpdatedDate;
+        public DateTime? CreatedDate;
+        public DateTime? UpdatedDate;
         public AssetType AssetType;
         public string ExternalRefId;
         public string EditMode;
@@ -74,8 +74,8 @@ namespace SturfeeVPS.Core.Models
         public double RefX;
         public double RefY;
         public double RefZ;
-        public DateTime CreatedDate;
-        public DateTime UpdatedDate;
+        public DateTime? CreatedDate;
+        public DateTime? UpdatedDate;
         public int FileSizeBytes;
         public float SpawnPositionX;
         public float SpawnPositionY;
@@ -99,7 +99,7 @@ namespace SturfeeVPS.Core.Models
         public string Status;
         public string SiteName;
         public string Thumbnail;
-        public DateTime CreatedDate;
+        public DateTime? CreatedDate;
         public DateTime? UpdatedDate;
         public GeoLocation ScanLocation;
         public double RefX;
@@ -146,8 +146,8 @@ namespace SturfeeVPS.Core.Models
         public string dthd_id;
         public string dtscan_id;
         public string thumbnail_id;
-        public DateTime createdDate;
-        public DateTime updatedDate;
+        public DateTime? createdDate;
+        public DateTime? updatedDate;
         public int floor;
         public bool isIndoor;
         public double refX;
