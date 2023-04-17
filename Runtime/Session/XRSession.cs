@@ -9,7 +9,7 @@ namespace SturfeeVPS.Core
 
 
     [Serializable]
-    public class XrSession
+    public class XrSession 
     {
         internal event SessionReadyAction OnSessionReady;
 
@@ -26,6 +26,10 @@ namespace SturfeeVPS.Core
         public Quaternion Orientation => _sessionPoseManager.Orientation;
         public Vector3 PositionOffset => _sessionPoseManager.PositionOffset;
         public Quaternion RotationOffset => _sessionPoseManager.RotationOffset;
+        public Vector3 Shift => _sessionPoseManager.Shift;
+
+        public Quaternion YawOffset => _sessionPoseManager.YawOffset;
+        public Quaternion PitchOffset => _sessionPoseManager.PitchOffset;
 
         public void SetPrintDebug(bool _value) => _sessionPoseManager.SetPrintDebug(_value);
 
