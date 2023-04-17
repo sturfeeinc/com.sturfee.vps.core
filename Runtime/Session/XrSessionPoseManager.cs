@@ -56,15 +56,17 @@ namespace SturfeeVPS.Core
                 // This is because after localization we need delta from only from localization point and not from center ref
                 var shift = RotateWithOffset(Shift);
 
-                var result = world + delta - shift;
-                result.z = altitude;
+                // var result = world + delta - shift;
+                // FOR DEBUG
+                var result = world;
+                // Debug.Log($"result: {result}");
 
                 //Debug.Log($"Location : {location.ToFormattedString()}, world : {world}, delta : {delta} , shift : {shift}, altitude : {altitude} ");
 
                 // FOR DEBUG
                 if (PrintDebug)
                 {
-                    SturfeeDebug.Log($"[XrSessionPoseManager.cs] [DEBUG BUTTON PRESS] world: {world}, result: {result}, shift without rotation offset: {Shift}, shift with rotation offset: {shift}, delta position without rotation offset: {GetDeltaPosition(out _)}, delta position with rotation offset: {delta}");
+                    SturfeeDebug.Log($"[XrSesssionPoseManager.cs] [DEBUG BUTTON PRESS] world: {world}, result: {result}, shift without rotation offset: {Shift}, shift with rotation offset: {shift}, delta position without rotation offset: {GetDeltaPosition(out _)}, delta position with rotation offset: {delta}");
                 }
 
                 return PositioningUtils.WorldToGeoLocation(result);
@@ -78,34 +80,36 @@ namespace SturfeeVPS.Core
 
             // First check if we have VPS location
             var localizationProvider = IOC.Resolve<ILocalizationProvider>();
+            var gpsProvider = IOC.Resolve<IGpsProvider>();
+
             if (localizationProvider != null && localizationProvider.GetProviderStatus() == ProviderStatus.Ready)        // have localiationProvider it's own status =>  notLocalized, localizing, loading, localized
             {
                 location = localizationProvider.GetVpsLocation(out includesElevation);
             }
-            else
+            // If no VPS, check if we have GPS location
+            else if (gpsProvider != null)
             {
-                // If no VPS, check if we have GPS location
-                var gpsProvider = IOC.Resolve<IGpsProvider>();
-                if (gpsProvider != null)
+                if (gpsProvider.GetProviderStatus() != ProviderStatus.Ready)
                 {
-                    if (gpsProvider.GetProviderStatus() != ProviderStatus.Ready)
+                    if (gpsProvider.GetApproximateLocation(out includesElevation).Latitude != 0 && gpsProvider.GetApproximateLocation(out includesElevation).Longitude != 0)
                     {
-                        if (gpsProvider.GetApproximateLocation(out includesElevation).Latitude != 0 && gpsProvider.GetApproximateLocation(out includesElevation).Longitude != 0)
-                        {
-                            location = gpsProvider.GetApproximateLocation(out includesElevation);
-                        }
-                        else
-                        {
-                            SturfeeDebug.LogWarning($" Cannot determine GPS location. Make sure GetApproximateLocation is deterministic");
-                        }
+                        location = gpsProvider.GetApproximateLocation(out includesElevation);
                     }
                     else
                     {
-                        location = gpsProvider.GetFineLocation(out includesElevation);
+                        SturfeeDebug.LogWarning($" Cannot determine GPS location. Make sure GetApproximateLocation is deterministic");
                     }
                 }
+                else
+                {
+                    location = gpsProvider.GetFineLocation(out includesElevation);
+                }
             }
-
+            else
+            {
+                location = PositioningUtils.WorldToGeoLocation(Vector3.zero);
+            }
+            // Debug.Log($"GetLocation: Lat: {location.Latitude}, Lon: {location.Longitude}, Alt: {location.Altitude}");
             return location;
         }
 
@@ -114,13 +118,40 @@ namespace SturfeeVPS.Core
             get
             {
                 var sensor = GetDeltaRotation();
-                var yawOfset = Quaternion.identity;
+                var yawOffset = Quaternion.identity;
                 var pitchOffset = Quaternion.identity;
 
                 var localizationProvider = IOC.Resolve<ILocalizationProvider>();
                 if (localizationProvider != null && localizationProvider.GetProviderStatus() == ProviderStatus.Ready)
                 {
-                    yawOfset = localizationProvider.YawOffset;
+                    yawOffset = localizationProvider.YawOffset;
+                    pitchOffset = localizationProvider.PitchOffset;
+
+                    if (localizationProvider.OffsetType == OffsetType.Euler)
+                    {
+                        var eulerOffset = localizationProvider.EulerOffset;
+                        var offset = Quaternion.Euler(eulerOffset);
+                        return offset * sensor;
+                    }
+                }
+                Debug.Log($"[XrSesssionPoseManager] :: pitch offset: {pitchOffset}");
+                return yawOffset * sensor * pitchOffset;
+            }
+        }
+
+        // FOR DEBUG
+        public Quaternion YawOffset
+        {
+            get
+            {
+                var sensor = GetDeltaRotation();
+                var yawOffset = Quaternion.identity;
+                var pitchOffset = Quaternion.identity;
+
+                var localizationProvider = IOC.Resolve<ILocalizationProvider>();
+                if (localizationProvider != null && localizationProvider.GetProviderStatus() == ProviderStatus.Ready)
+                {
+                    yawOffset = localizationProvider.YawOffset;
                     pitchOffset = localizationProvider.PitchOffset;
 
                     if (localizationProvider.OffsetType == OffsetType.Euler)
@@ -131,7 +162,33 @@ namespace SturfeeVPS.Core
                     }
                 }
 
-                return yawOfset * sensor * pitchOffset;
+                return yawOffset;
+            }
+        }
+        // FOR DEBUG
+        public Quaternion PitchOffset
+        {
+            get
+            {
+                var sensor = GetDeltaRotation();
+                var yawOffset = Quaternion.identity;
+                var pitchOffset = Quaternion.identity;
+
+                var localizationProvider = IOC.Resolve<ILocalizationProvider>();
+                if (localizationProvider != null && localizationProvider.GetProviderStatus() == ProviderStatus.Ready)
+                {
+                    yawOffset = localizationProvider.YawOffset;
+                    pitchOffset = localizationProvider.PitchOffset;
+
+                    if (localizationProvider.OffsetType == OffsetType.Euler)
+                    {
+                        var eulerOffset = localizationProvider.EulerOffset;
+                        var offset = Quaternion.Euler(eulerOffset);
+                        return offset * sensor;
+                    }
+                }
+                
+                return pitchOffset;
             }
         }
 
@@ -143,18 +200,34 @@ namespace SturfeeVPS.Core
 
                 // FOR DEBUG
                 if (PrintDebug)
-                    SturfeeDebug.Log($"[XrSessionPoseManager.cs] [DEBUG BUTTON PRESS] localPos: {localPos}");
+                    SturfeeDebug.Log($"[XrSesssionPoseManager.cs] [DEBUG BUTTON PRESS] localPos: {localPos}");
 
                 var poseProvider = IOC.Resolve<IPoseProvider>();
                 if(poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
                 {
-                    return localPos - RotateWithOffset(poseProvider.GetPosition(out _));
+                    // FOR DEBUG
+                    return localPos;
+                    // return localPos - RotateWithOffset(poseProvider.GetPosition(out _));
                 }
                 return localPos;
             }
-
         }
 
+        // public Quaternion RotationOffset {
+        //     get
+        //     {
+        //         var sensor = Quaternion.identity;
+        //         var poseProvider = IOC.Resolve<IPoseProvider>();
+        //         if (poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
+        //         {
+        //             sensor = poseProvider.GetRotation();
+        //         }
+
+        //         return Orientation * Quaternion.Inverse(sensor);
+        //     }
+        // }
+        
+        // FOR DEBUG
         public Quaternion RotationOffset {
 
             get
@@ -166,7 +239,7 @@ namespace SturfeeVPS.Core
                     sensor = poseProvider.GetRotation();
                 }
 
-                return Orientation * Quaternion.Inverse(sensor);
+                return YawOffset;
             }
         }
 
@@ -199,13 +272,14 @@ namespace SturfeeVPS.Core
             return altitude;
         }
 
-        private Vector3 Shift
+        public Vector3 Shift
         {
             get
             {
                 var localizationProvider = IOC.Resolve<ILocalizationProvider>();
                 if (localizationProvider != null && localizationProvider.GetProviderStatus() == ProviderStatus.Ready)
                 {
+                    Debug.Log($"Shift: {_shift}");
                     return _shift;
                 }
                 return Vector3.zero;
@@ -301,6 +375,7 @@ namespace SturfeeVPS.Core
 
             return result;
         }
+
 
         private void OnLocalizationStart()
         {
