@@ -56,9 +56,11 @@ namespace SturfeeVPS.Core
                 // This is because after localization we need delta from only from localization point and not from center ref
                 var shift = RotateWithOffset(Shift);
 
-                // var result = world + delta - shift;
-                // FOR DEBUG
-                var result = world;
+                var result = world + delta - shift;
+                result.z = altitude;
+                
+                // // FOR DEBUG
+                // var result = world; // Jay's changes
                 // Debug.Log($"result: {result}");
 
                 //Debug.Log($"Location : {location.ToFormattedString()}, world : {world}, delta : {delta} , shift : {shift}, altitude : {altitude} ");
