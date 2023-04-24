@@ -58,7 +58,7 @@ namespace SturfeeVPS.Core
 
                 var result = world + delta - shift;
                 result.z = altitude;
-                
+
                 // // FOR DEBUG
                 // var result = world; // Jay's changes
                 // Debug.Log($"result: {result}");
@@ -136,7 +136,7 @@ namespace SturfeeVPS.Core
                         return offset * sensor;
                     }
                 }
-                Debug.Log($"[XrSesssionPoseManager] :: pitch offset: {pitchOffset}");
+                // Debug.Log($"[XrSesssionPoseManager] :: pitch offset: {pitchOffset}");
                 return yawOffset * sensor * pitchOffset;
             }
         }
@@ -202,7 +202,7 @@ namespace SturfeeVPS.Core
 
                 // FOR DEBUG
                 if (PrintDebug)
-                    SturfeeDebug.Log($"[XrSesssionPoseManager.cs] [DEBUG BUTTON PRESS] localPos: {localPos}");
+                    SturfeeDebug.Log($"[XrSesssionPoseManager] [DEBUG BUTTON PRESS] localPos: {localPos}");
 
                 var poseProvider = IOC.Resolve<IPoseProvider>();
                 if(poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
