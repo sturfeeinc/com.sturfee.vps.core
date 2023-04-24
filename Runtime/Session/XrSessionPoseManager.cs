@@ -206,30 +206,14 @@ namespace SturfeeVPS.Core
                 if(poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
                 {
                     // FOR DEBUG
-                    return localPos;
-                    // return localPos - RotateWithOffset(poseProvider.GetPosition(out _));
+                    // return localPos; // Jay's change
+                    return localPos - RotateWithOffset(poseProvider.GetPosition(out _));
                 }
                 return localPos;
             }
         }
 
-        // public Quaternion RotationOffset {
-        //     get
-        //     {
-        //         var sensor = Quaternion.identity;
-        //         var poseProvider = IOC.Resolve<IPoseProvider>();
-        //         if (poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
-        //         {
-        //             sensor = poseProvider.GetRotation();
-        //         }
-
-        //         return Orientation * Quaternion.Inverse(sensor);
-        //     }
-        // }
-        
-        // FOR DEBUG
         public Quaternion RotationOffset {
-
             get
             {
                 var sensor = Quaternion.identity;
@@ -239,9 +223,26 @@ namespace SturfeeVPS.Core
                     sensor = poseProvider.GetRotation();
                 }
 
-                return YawOffset;
+                return Orientation * Quaternion.Inverse(sensor);
             }
         }
+        
+        // FOR DEBUG
+        // Jay's changes
+        // public Quaternion RotationOffset {
+
+        //     get
+        //     {
+        //         var sensor = Quaternion.identity;
+        //         var poseProvider = IOC.Resolve<IPoseProvider>();
+        //         if (poseProvider != null && poseProvider.GetProviderStatus() == ProviderStatus.Ready)
+        //         {
+        //             sensor = poseProvider.GetRotation();
+        //         }
+
+        //         return YawOffset;
+        //     }
+        // }
 
         private float GetAltitude(Vector3 world, Vector3 delta, bool locationIncludesElevation, bool deltaIncludesElevation)
         {

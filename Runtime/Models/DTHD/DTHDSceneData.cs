@@ -109,6 +109,9 @@ namespace SturfeeVPS.Core.Models
         public string ScanMeshUrl;
         public VpsHdSite VpsHdSite;
 
+        public string MediaStatus;
+        public string DtScanStatus;
+        public string AnchorStatus;
     }
 
     // [Serializable]
