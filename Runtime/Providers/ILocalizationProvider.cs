@@ -19,6 +19,9 @@ namespace SturfeeVPS.Core
         Quaternion RollOffset { get; }
 
         Vector3 EulerOffset { get; }
+        Quaternion RotationOffset { get; }
+        int FrameNumber { get; }
+        GeoLocation Location { get; }
 
         GeoLocation GetVpsLocation(out bool includesElevation);
 

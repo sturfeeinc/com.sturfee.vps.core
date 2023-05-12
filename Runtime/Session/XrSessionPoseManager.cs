@@ -225,7 +225,7 @@ namespace SturfeeVPS.Core
                     sensor = poseProvider.GetRotation();
                 }
 
-                return Orientation * Quaternion.Inverse(sensor);
+                return Orientation * Quaternion.Inverse(sensor); // here the offset is applied (offset is called "Orientation" here)
             }
         }
         
