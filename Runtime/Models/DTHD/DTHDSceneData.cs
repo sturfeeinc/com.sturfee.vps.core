@@ -112,6 +112,8 @@ namespace SturfeeVPS.Core.Models
         public string MediaStatus;
         public string DtScanStatus;
         public string AnchorStatus;
+        
+        public string Category;
     }
 
     // [Serializable]
