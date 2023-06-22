@@ -87,6 +87,7 @@ namespace SturfeeVPS.Core.Models
         public string EnhancedMesh;
         public List<DtHdAsset> Assets;
         public string DtEnvironmentUrl;
+        public string CesiumAssetId;
     }
 
     /// <summary>
