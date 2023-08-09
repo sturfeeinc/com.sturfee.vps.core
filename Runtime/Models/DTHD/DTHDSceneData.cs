@@ -180,6 +180,7 @@ namespace SturfeeVPS.Core.Models
     public class DtEnvironment
     {
         public UnityEnvironment Unity;
+        public UnityEnvironment Cesium;
     }
 
     /// <summary>
