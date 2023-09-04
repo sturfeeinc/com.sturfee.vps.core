@@ -88,6 +88,32 @@ namespace SturfeeVPS.Core.Models
         public List<DtHdAsset> Assets;
         public string DtEnvironmentUrl;
         public string CesiumAssetId;
+        public List<DtHdLayoutVersion> Versions;
+    }
+    
+    /// <summary>
+    /// DTHD Version status options
+    /// </summary>
+    [Serializable]
+    public enum DtHdLayoutVersionStatus
+    {
+        DRAFT,
+        REVIEW,
+        LIVE,
+        ARCHIVED
+    }
+
+    /// <summary>
+    /// Data structure for DTHD Version
+    /// </summary>
+    [Serializable]
+    public class DtHdLayoutVersion
+    {
+        public int Version;
+        public DtHdLayoutVersionStatus Status;
+        public string CesiumAssetId;
+        public DateTime? UpdatedDate;
+        public DateTime? LastPublishedDate;
     }
 
     /// <summary>
