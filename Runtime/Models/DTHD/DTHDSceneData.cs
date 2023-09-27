@@ -114,6 +114,11 @@ namespace SturfeeVPS.Core.Models
         public string CesiumAssetId;
         public DateTime? UpdatedDate;
         public DateTime? LastPublishedDate;
+
+        public float SpawnPositionX;
+        public float SpawnPositionY;
+        public float SpawnPositionZ;
+        public float SpawnHeading;
     }
 
     /// <summary>
@@ -135,6 +140,11 @@ namespace SturfeeVPS.Core.Models
         public int Floor;
         public string ScanMeshUrl;
         public VpsHdSite VpsHdSite;
+
+        public float SpawnPositionX;
+        public float SpawnPositionY;
+        public float SpawnPositionZ;
+        public float SpawnHeading;
 
         public string MediaStatus;
         public string DtScanStatus;
