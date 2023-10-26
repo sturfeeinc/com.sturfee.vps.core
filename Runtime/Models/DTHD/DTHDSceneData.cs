@@ -151,6 +151,21 @@ namespace SturfeeVPS.Core.Models
         public string AnchorStatus;
         
         public string Category;
+
+        public string? VpsAnchorId;
+        public string? VpsTrackingId;
+        public float? ScanArea;
+        public float? BoundingBoxLLX;
+        public float? BoundingBoxLLY;
+        public float? BoundingBoxLLZ;
+        public float? BoundingBoxURX;
+        public float? BoundingBoxURY;
+        public float? BoundingBoxURZ;
+        public bool? NeedsRescan;
+        public string? ScanSize;
+        public string? CesiumAssetId;
+        public string? SourceMetaAppId;
+        public string? SourceMetaAppVersion;
     }
 
     // [Serializable]
